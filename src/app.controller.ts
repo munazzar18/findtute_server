@@ -1,13 +1,11 @@
-import { Get } from "@nestjs/common";
+import { Controller, Get } from '@nestjs/common';
 
-export class App {
+@Controller() // This is the default route prefix
+export class AppController { // Name the class with the Controller suffix
     constructor() { }
 
-
-
-    @Get()
+    @Get('/') // This defines a GET route at the root URL '/'
     async getHello() {
-        return 'hello welcome to teachu server...'
+        return 'Hello, welcome to TeachU server...';
     }
-
 }

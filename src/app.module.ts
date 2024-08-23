@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from './constants/jwtConstants';
 import { ProfileModule } from './profile/profile.module';
 import { CoursesModule } from './courses/courses.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { CoursesModule } from './courses/courses.module';
     CoursesModule
 
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [],
 })
 export class AppModule { }
