@@ -1,5 +1,6 @@
+import { GradeEntity } from "src/grade/grade.entity";
 import { UserEntity } from "src/user/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -61,4 +62,9 @@ export class ProfileEntity {
 
     @Column({ nullable: false })
     user_id: string
+
+    @ManyToMany(() => GradeEntity, (grade) => grade.profiles)
+    grades: GradeEntity[]
+
+
 }

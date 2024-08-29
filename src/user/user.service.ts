@@ -6,7 +6,8 @@ import { RegisterUserDto } from './registerUser.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 // import { Twilio } from 'twilio';
 import { EncryptionService } from 'src/encryption/encryption.service';
-import * as cypto from "crypto"
+import * as path from 'path';
+import { promises as fs } from 'fs';
 
 
 @Injectable()
@@ -43,16 +44,23 @@ export class UserService {
     }
 
     async sendOTPMail(email: string, otp: string) {
+
+        // const templatePath = path.join(__dirname, '../templates/OTP.html')
+        const templatePath = path.join(__dirname, '..', '..', 'public', 'OTP.html');
+
+
+        let emailHtml = await fs.readFile(templatePath, 'utf-8')
+
+        emailHtml = emailHtml.replace('[User Name]', email)
+        emailHtml = emailHtml.replace('[Verification Code]', otp)
+
         const encrypted = await this.encryptService.encrypt(email)
         const dycrypted = await this.encryptService.decrypt(encrypted)
         await this.mailerService.sendMail({
             to: email, // List of receivers email address
             from: 'teachu@info.com', // Senders email address
-            subject: 'OTP', // Subject line
-            html: `<p><b>Please do not reply to this message.</b> This is your OTP, this otp will expired in 3 minutes.</p>
-               <br>
-                Your OTP: ${otp}
-               </br>`, // HTML body content
+            subject: 'TeachU email verification code', // Subject line
+            html: emailHtml, // HTML body content
         })
             .then((success) => {
                 console.log("Success:", success)

@@ -2,8 +2,6 @@ import { Role } from "src/roles/role.enum";
 import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Exclude } from "class-transformer";
 import { ProfileEntity } from "src/profile/profile.entity";
-import { Course } from "src/courses/course.entity";
-
 
 @Entity()
 export class UserEntity {
@@ -38,9 +36,6 @@ export class UserEntity {
     @JoinColumn({ name: 'profile' })
     profile: ProfileEntity
 
-    @OneToMany(() => Course, (course) => course.user_id)
-    @JoinColumn({ name: 'courses' })
-    courses: Course[]
 }
 
 

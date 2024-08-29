@@ -58,6 +58,10 @@ export class ProfileDto {
     @IsArray()
     experience: Record<string, any>[];
 
+    @ApiProperty()
+    @IsNotEmpty()
+    grades: Record<string, any>[];
+
     is_active: boolean;
 
     is_deleted: boolean;
