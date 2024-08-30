@@ -60,7 +60,9 @@ export class ProfileDto {
 
     @ApiProperty()
     @IsNotEmpty()
-    grades: Record<string, any>[];
+    @IsArray()
+    @IsString({ each: true })
+    grades_ids: string[];
 
     is_active: boolean;
 

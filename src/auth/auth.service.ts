@@ -5,6 +5,7 @@ import { comparePass, encodedPass } from './bcrypt';
 import { UserEntity, serializedUser } from 'src/user/user.entity';
 import { RegisterUserDto } from 'src/user/registerUser.dto';
 import { generateOtp } from 'src/helpers/helpers';
+import { Role } from 'src/roles/role.enum';
 // import { Twilio } from 'twilio';
 
 @Injectable()
@@ -48,25 +49,6 @@ export class AuthService {
         }
     }
 
-    // async generateOtp() {
-    //     // const accountSid = process.env.TWILIO_SID
-    //     // const authToken = process.env.TWILIO_AUTH_TOKEN
-    //     // const client = this.twilioClient = new Twilio(accountSid, authToken);
-    //     const OTP = Math.floor(100000 + Math.random() * 900000).toString()
-    //     const currentTime = new Date().getTime()
-    //     const expiryTime = currentTime + 180000
-    //     // await client.messages
-    //     //     .create({
-    //     //         body: `Your confirmation code is ${OTP}`,
-    //     //         from: process.env.TWILIO_NUMBER,
-    //     //         to: mobile
-    //     //     })
-    //     return {
-    //         OTP,
-    //         expiryTime
-    //     }
-    // }
-
     async verifyOtp(email: string, otp: string) {
         const currentTime = new Date().getTime()
         const user = await this.userService.findOneByEmail(email)
@@ -102,6 +84,11 @@ export class AuthService {
     }
 
     async register(data: RegisterUserDto) {
+
+        if (data.roles.includes(Role.Admin)) {
+            throw new HttpException('Admin cannot register', HttpStatus.FORBIDDEN)
+        }
+
         const userDb = await this.userService.findOneByEmail(data.email)
         if (userDb) {
             throw new HttpException('user with this email already exists', HttpStatus.CONFLICT)

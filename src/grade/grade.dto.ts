@@ -1,13 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsArray, IsNotEmpty } from "class-validator"
+import { IsNotEmpty, IsString } from "class-validator"
 
 
 export class CreateGradeDTO {
 
     @ApiProperty()
-    @IsArray()
+    @IsString()
     @IsNotEmpty()
-    grade: Record<string, any>[]
+    grade: string
 
     profile_id: string
 }

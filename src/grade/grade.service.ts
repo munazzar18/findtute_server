@@ -42,17 +42,10 @@ export class GradeService {
     }
 
 
-    async create(grade: CreateGradeDTO, authUser: UserEntity) {
+    async create(grade: CreateGradeDTO) {
         try {
-            const profile = await this.profileRepo.findOneBy({ id: authUser.profile.id })
-
-            if (!profile) {
-                return new Error('Profile not found')
-            }
-
             const createGrade = this.gradeRepo.create({
                 ...grade,
-                profiles: [profile]
             })
             const savedGrade = await this.gradeRepo.save(createGrade)
             return savedGrade
@@ -62,76 +55,47 @@ export class GradeService {
         }
     }
 
-
-    async update(id: string, updateData: Partial<CreateGradeDTO>, authUser: UserEntity) {
+    async update(id: string, updateData: Partial<CreateGradeDTO>) {
         try {
             const grade = await this.gradeRepo.findOne({
                 where: {
                     id
-                },
-                relations: {
-                    profiles: true
                 }
-            })
-
-            if (!grade) {
-                return new Error('Grade not found')
-            }
-
-            const profile = grade.profiles.find(profile => profile.id === authUser.profile.id)
-
-            if (!profile) {
-                return new Error('You are not authorized to update this grade')
-            }
-
-            if (updateData.profile_id) {
-                const exsistedProfile = await this.profileRepo.findOne({
-                    where: {
-                        id: updateData.profile_id
-                    }
-                })
-
-                if (exsistedProfile) {
-                    grade.profiles = [exsistedProfile]
-                }
-            }
-
-            Object.assign(grade, updateData)
-
-            const updateGrade = await this.gradeRepo.save(grade)
-
-            return updateGrade
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
-
-    async delete(id: string, authUser: UserEntity) {
-
-        try {
-            const grade = await this.gradeRepo.findOne({
-                where: { id },
-                relations: ['profiles']
             });
 
             if (!grade) {
-                return new Error('Grade not found')
+                return new Error('Grade not found');
             }
 
-            const isAuthorized = grade.profiles.some(profile => profile.id === authUser.profile.id)
+            Object.assign(grade, updateData);
 
-            if (!isAuthorized) {
-                return new Error('You are not authorized to delete this grade')
-            }
+            const updatedGrade = await this.gradeRepo.save(grade);
 
-            return await this.gradeRepo.delete(grade)
+            return updatedGrade;
         } catch (error) {
-            console.log(error)
-            return error
+            console.log(error);
+            return error;
         }
     }
+
+
+    async delete(id: string) {
+        try {
+            const grade = await this.gradeRepo.findOne({ where: { id } });
+
+            if (!grade) {
+                return new Error('Grade not found');
+            }
+
+            await this.gradeRepo.delete(id);
+
+            return { message: 'Grade deleted successfully' };
+        } catch (error) {
+            console.error(error);
+            return error;
+        }
+    }
+
 
 
 }

@@ -1,16 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProfileEntity } from './profile.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { ProfileDto } from './profile.dto';
 import { UserEntity } from 'src/user/user.entity';
+import { GradeEntity } from 'src/grade/grade.entity';
 
 @Injectable()
 export class ProfileService {
 
     constructor(
-        @InjectRepository(ProfileEntity)
-        private profileRepo: Repository<ProfileEntity>,
+        @InjectRepository(ProfileEntity) private profileRepo: Repository<ProfileEntity>,
+        @InjectRepository(GradeEntity) private gradeRepo: Repository<GradeEntity>
     ) { }
 
     async findAll() {
@@ -51,6 +52,16 @@ export class ProfileService {
         const DeletedProfile = await this.profileRepo.findOneBy({ user_id: authUser.id, is_deleted: true });
         const ExistedProfile = await this.profileRepo.findOneBy({ user_id: authUser.id, is_deleted: false });
 
+        const getGrades = await this.gradeRepo.find({
+            where: {
+                id: In(data.grades_ids)
+            }
+        })
+
+        if (getGrades.length !== data.grades_ids.length) {
+            throw new Error('Some grade IDs provided are invalid')
+        }
+
         if (DeletedProfile) {
             try {
                 const UpdateProfile = await this.updateDeleted(DeletedProfile.id, data, authUser)
@@ -75,7 +86,8 @@ export class ProfileService {
             try {
                 const profile = this.profileRepo.create({
                     ...data,
-                    user_id: authUser.id
+                    user_id: authUser.id,
+                    grades: getGrades
                 });
                 const savedProfile = await this.profileRepo.save(profile);
                 return savedProfile

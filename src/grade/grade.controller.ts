@@ -34,10 +34,9 @@ export class GradeController {
     @Post()
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
-    async create(@Body() grade: CreateGradeDTO, @Request() req) {
+    async create(@Body() grade: CreateGradeDTO) {
         try {
-            const profileId = req.user.profile.id
-            const createGrade = this.gradeService.create(grade, profileId)
+            const createGrade = await this.gradeService.create(grade)
             return sendJson(true, 'Grade created successfully', createGrade)
         } catch (error) {
             return sendJson(false, 'Failed to create grade', error)
@@ -49,27 +48,24 @@ export class GradeController {
     @Put('/:id')
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
-    async update(@Param('id') id: string, @Body() data: CreateGradeDTO, @Request() req) {
+    async update(@Param('id') id: string, @Body() updateData: Partial<CreateGradeDTO>) {
         try {
-            const profileId = req.user.profile.id
-            const updateGrade = this.gradeService.update(id, data, profileId)
-            return sendJson(true, 'Grade updated successfully', updateGrade)
+            const updatedGrade = await this.gradeService.update(id, updateData);
+            return sendJson(true, 'Grade updated successfully', updatedGrade);
         } catch (error) {
-            return sendJson(false, 'Failed to update grade', error)
+            return sendJson(false, 'Failed to update grade', error);
         }
     }
 
     @Delete('/id/:id')
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
-    async delete(@Param('id') id: string, @Request() req) {
+    async delete(@Param('id') id: string) {
         try {
-            const profileId = req.user.profile.id
-            const grade = await this.gradeService.delete(id, profileId)
-            return sendJson(true, 'Grade deleted successfully', grade)
+            const result = await this.gradeService.delete(id);
+            return sendJson(true, 'Grade deleted successfully', result);
         } catch (error) {
-            return sendJson(false, 'Failed to delete grade', error)
+            return sendJson(false, 'Failed to delete grade', error);
         }
-
     }
 }

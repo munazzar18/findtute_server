@@ -7,8 +7,8 @@ export class GradeEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
-    @Column({ type: 'jsonb', nullable: false })
-    grade: Record<string, any>[]
+    @Column({ nullable: false })
+    grade: string
 
 
     @CreateDateColumn({ type: 'timestamptz' })

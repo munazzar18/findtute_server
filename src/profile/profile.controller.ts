@@ -54,6 +54,7 @@ export class ProfileController {
 
 
     @Post('create')
+    @UseGuards(AuthGuard)
     async createProfile(@Body() data: ProfileDto, @Request() req) {
         try {
             const user_id: UserEntity = req.user
