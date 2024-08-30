@@ -86,7 +86,7 @@ export class AuthService {
     async register(data: RegisterUserDto) {
 
         if (data.roles.includes(Role.Admin)) {
-            throw new HttpException('Admin cannot register', HttpStatus.FORBIDDEN)
+            throw new HttpException('Invalid role', HttpStatus.FORBIDDEN)
         }
 
         const userDb = await this.userService.findOneByEmail(data.email)

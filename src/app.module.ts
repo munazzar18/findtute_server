@@ -12,6 +12,7 @@ import { AppController } from './app.controller';
 import { GradeModule } from './grade/grade.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { SubjectsModule } from './subjects/subjects.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { join } from 'path';
     EncryptionModule,
     ProfileModule,
     GradeModule,
+    SubjectsModule,
   ],
   controllers: [AppController],
   providers: [],

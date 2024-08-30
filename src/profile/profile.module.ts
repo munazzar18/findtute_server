@@ -9,10 +9,11 @@ import { UserEntity } from 'src/user/user.entity';
 import { UserService } from 'src/user/user.service';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { GradeEntity } from 'src/grade/grade.entity';
+import { SubjectsEntity } from 'src/subjects/subjects.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ProfileEntity, UserEntity, GradeEntity]),
+    TypeOrmModule.forFeature([ProfileEntity, UserEntity, GradeEntity, SubjectsEntity]),
     JwtModule.register({
       secret: JwtConstants.secret
     })

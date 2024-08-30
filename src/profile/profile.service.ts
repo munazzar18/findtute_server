@@ -5,13 +5,16 @@ import { In, Repository } from 'typeorm';
 import { ProfileDto } from './profile.dto';
 import { UserEntity } from 'src/user/user.entity';
 import { GradeEntity } from 'src/grade/grade.entity';
+import { SubjectsEntity } from 'src/subjects/subjects.entity';
 
 @Injectable()
 export class ProfileService {
 
     constructor(
         @InjectRepository(ProfileEntity) private profileRepo: Repository<ProfileEntity>,
-        @InjectRepository(GradeEntity) private gradeRepo: Repository<GradeEntity>
+        @InjectRepository(GradeEntity) private gradeRepo: Repository<GradeEntity>,
+        @InjectRepository(SubjectsEntity) private subjectsRepo: Repository<SubjectsEntity>
+
     ) { }
 
     async findAll() {
@@ -62,6 +65,16 @@ export class ProfileService {
             throw new Error('Some grade IDs provided are invalid')
         }
 
+        const getSubjects = await this.subjectsRepo.find({
+            where: {
+                id: In(data.subjects_ids)
+            }
+        })
+
+        if (getSubjects.length !== data.subjects_ids.length) {
+            throw new Error('Some subject IDs provided are invalid')
+        }
+
         if (DeletedProfile) {
             try {
                 const UpdateProfile = await this.updateDeleted(DeletedProfile.id, data, authUser)
@@ -87,7 +100,8 @@ export class ProfileService {
                 const profile = this.profileRepo.create({
                     ...data,
                     user_id: authUser.id,
-                    grades: getGrades
+                    grades: getGrades,
+                    subjects: getSubjects
                 });
                 const savedProfile = await this.profileRepo.save(profile);
                 return savedProfile

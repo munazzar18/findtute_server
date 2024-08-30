@@ -64,6 +64,12 @@ export class ProfileDto {
     @IsString({ each: true })
     grades_ids: string[];
 
+    @ApiProperty()
+    @IsNotEmpty()
+    @IsArray()
+    @IsString({ each: true })
+    subjects_ids: string[];
+
     is_active: boolean;
 
     is_deleted: boolean;
