@@ -61,4 +61,9 @@ import { SubjectsModule } from './subjects/subjects.module';
   providers: [],
 })
 
+console.log("DB URL:", process.env.DB_URL)
+console.log("DB PORT:", process.env.DB_PORT)
+console.log("DB Username:", process.env.DB_USERNAME)
+console.log("DB Password:", process.env.DB_PASSWORD)
+console.log("DB NAME:", process.env.DB_NAME)
 export class AppModule { }
