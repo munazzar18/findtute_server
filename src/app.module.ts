@@ -17,9 +17,8 @@ import { SubjectsModule } from './subjects/subjects.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [() => process.env],
       isGlobal: true,
-      envFilePath: ['.env.development', 'env.production']
+      envFilePath: ['.env', '.env.development', 'env.production']
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
