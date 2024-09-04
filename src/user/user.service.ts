@@ -8,6 +8,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import * as path from 'path';
 import { promises as fs } from 'fs';
+import { UpdateUserProfileDto } from './updateUserProfile.dto';
 
 
 @Injectable()
@@ -33,9 +34,40 @@ export class UserService {
         return await this.userRepo.findOneBy({ email })
     }
 
-
     async updateUser(id: string, updateData: Partial<UserEntity>) {
-        await this.userRepo.update(id, updateData);
+        return await this.userRepo.update(id, updateData)
+    }
+
+    async updateUserProfile(id: string, updateData: UpdateUserProfileDto, authUser: UserEntity) {
+        try {
+            const getUser = await this.userRepo.findOneBy({ id, is_deleted: false });
+            if (!getUser) {
+                throw new Error('User profile is not found');
+            }
+
+            if (getUser.email_verified === false) {
+                throw new Error('Please verify your email first');
+            }
+
+            if (authUser.id !== id) {
+                throw new Error('You are not authorized to update this user profile');
+            }
+
+            const updatedUser = await this.userRepo.save({
+                ...getUser,
+                ...updateData,
+                is_active: getUser.is_active,
+                is_deleted: getUser.is_deleted,
+                is_verified: getUser.is_verified,
+                is_online: getUser.is_online,
+                is_Authorized: getUser.is_Authorized,
+            });
+            return updatedUser
+
+        } catch (error) {
+            console.log(error)
+            return error
+        }
     }
 
     async create(data: RegisterUserDto) {
@@ -58,15 +90,15 @@ export class UserService {
         const dycrypted = await this.encryptService.decrypt(encrypted)
         await this.mailerService.sendMail({
             to: email, // List of receivers email address
-            from: 'teachu@info.com', // Senders email address
-            subject: 'TeachU email verification code', // Subject line
+            from: 'noreply@findtute.com', // Senders email address
+            subject: 'FindTute email verification code', // Subject line
             html: emailHtml, // HTML body content
         })
             .then((success) => {
-                console.log("Success:", success)
+                console.log("Verification email sent successfully:", success)
             })
             .catch((err) => {
-                console.log("ERROR AYA HA:", err)
+                console.log("Verification email not sent:", err)
             });
 
         return {

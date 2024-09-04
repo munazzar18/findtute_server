@@ -7,7 +7,6 @@ import { EncryptionModule } from './encryption/encryption.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from './constants/jwtConstants';
-import { ProfileModule } from './profile/profile.module';
 import { AppController } from './app.controller';
 import { GradeModule } from './grade/grade.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -35,11 +34,16 @@ import { SubjectsModule } from './subjects/subjects.module';
       transport: {
         host: process.env.MAIL_HOST,
         port: parseInt(process.env.MAIL_PORT),
+        secure: true,
         auth: {
           user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_PASS
         }
-      }
+      },
+      defaults: {
+        from: '"No Reply" <noreply@findtute.com>',
+        replyTo: 'noreply@findtute.com',
+      },
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
@@ -53,7 +57,6 @@ import { SubjectsModule } from './subjects/subjects.module';
     AuthModule,
     UserModule,
     EncryptionModule,
-    ProfileModule,
     GradeModule,
     SubjectsModule,
   ],

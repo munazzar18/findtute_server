@@ -1,7 +1,8 @@
 import { Role } from "src/roles/role.enum";
-import { Column, CreateDateColumn, Entity, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Exclude } from "class-transformer";
-import { ProfileEntity } from "src/profile/profile.entity";
+import { GradeEntity } from "src/grade/grade.entity";
+import { SubjectsEntity } from "src/subjects/subjects.entity";
 
 @Entity()
 export class UserEntity {
@@ -26,15 +27,73 @@ export class UserEntity {
     @Column({ nullable: false, default: false })
     email_verified: boolean;
 
+
+    @Column({ nullable: true })
+    first_name: string;
+
+    @Column({ nullable: true })
+    last_name: string;
+
+    @Column({ nullable: true })
+    cnic: string;
+
+    @Column({ nullable: true })
+    mobile: string;
+
+    @Column({ type: "double precision", nullable: true })
+    latitude: number;
+
+    @Column({ type: 'double precision', nullable: true })
+    longitude: number;
+
+    @Column({ nullable: true })
+    address: string;
+
+    @Column({ nullable: true })
+    avatar: string;
+
+    @Column({ nullable: true })
+    preference: string;
+
+    @Column({ type: 'jsonb', nullable: true })
+    education: Record<string, any>[]
+
+    @Column({ type: 'jsonb', nullable: true })
+    experience: Record<string, any>[]
+
+    @Column({ nullable: true, default: false })
+    is_active: boolean;
+
+    @Column({ nullable: true, default: false })
+    is_deleted: boolean;
+
+    @Column({ nullable: true, default: false })
+    is_verified: boolean;
+
+    @Column({ nullable: true, default: false })
+    is_online: boolean;
+
+    @Column({ nullable: true, default: false })
+    is_Authorized: boolean;
+
     @CreateDateColumn({ type: 'timestamptz' })
     created_at: Date;
 
     @CreateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
 
-    @OneToOne(() => ProfileEntity, (profile) => profile.user_id)
-    @JoinColumn({ name: 'profile' })
-    profile: ProfileEntity
+    @Column({ nullable: true })
+    grades_id: string
+
+    @Column({ nullable: true })
+    subjects_id: string
+
+
+    @ManyToMany(() => GradeEntity, (grade) => grade.users)
+    grades: GradeEntity[]
+
+    @ManyToMany(() => SubjectsEntity, (subject) => subject.users)
+    subjects: SubjectsEntity[]
 
 }
 

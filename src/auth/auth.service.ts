@@ -85,8 +85,10 @@ export class AuthService {
 
     async register(data: RegisterUserDto) {
 
-        if (data.roles.includes(Role.Admin)) {
-            throw new HttpException('Invalid role', HttpStatus.FORBIDDEN)
+        const allowedRoles = [Role.Parent, Role.Student, Role.Teacher]
+
+        if (!allowedRoles.includes(data.roles)) {
+            throw new HttpException('Invalid role, you can only select parent, student or teacher', HttpStatus.FORBIDDEN);
         }
 
         const userDb = await this.userService.findOneByEmail(data.email)

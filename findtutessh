@@ -1,0 +1,15 @@
+-----BEGIN OPENSSH PRIVATE KEY-----
+b3BlbnNzaC1rZXktdjEAAAAACmFlczI1Ni1jdHIAAAAGYmNyeXB0AAAAGAAAABAnjz2HNS
+82/pyI/VDRYz3vAAAAEAAAAAEAAAAzAAAAC3NzaC1lZDI1NTE5AAAAIKITCzcfR8/ZRogD
+0V5vF9MPlWyO8d443xxA1CRPPwtCAAAAoIW3KTFNZjxK2xuv4kDfsWGS5GvfHNqN+bw9/h
+ZjSdgWNH6v6/O7JW+58vZmmxzunCtJupX/grOZJUAJONWaJA7EvOY3eACjbnIyUYsETwlW
+nB5XsqAmuifsrHZOY+IFnCDIVGM+g6Yczh9xPMUft94L2iD0VBwXkvX2t1IdCCa55X2Bft
+PC5gy9kyOAn4lnvmojqYiRrJaWXhSRRZdgNGQ=
+-----END OPENSSH PRIVATE KEY-----
+
+
+scp -i C:/Users/DELL/Desktop/TeachU/findtute.pem findtute_build.zip ubuntu@16.170.215.126:~/
+
+sudo nano /etc/nginx/sites-available/default
+
+sudo nano /etc/nginx/sites-available/findtute

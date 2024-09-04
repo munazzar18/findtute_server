@@ -4,14 +4,13 @@ import { Repository } from 'typeorm';
 import { GradeEntity } from './grade.entity';
 import { CreateGradeDTO } from './grade.dto';
 import { UserEntity } from 'src/user/user.entity';
-import { ProfileEntity } from 'src/profile/profile.entity';
 
 @Injectable()
 export class GradeService {
 
     constructor(
         @InjectRepository(GradeEntity) private gradeRepo: Repository<GradeEntity>,
-        @InjectRepository(ProfileEntity) private profileRepo: Repository<ProfileEntity>
+        @InjectRepository(UserEntity) private UserRepo: Repository<UserEntity>
     ) { }
 
     async findAll() {
@@ -32,9 +31,9 @@ export class GradeService {
         }
     }
 
-    async findOneByProfileId(profileId: string) {
+    async findOneByuserId(userId: string) {
         try {
-            return await this.gradeRepo.findOneBy({ id: profileId })
+            return await this.gradeRepo.findOneBy({ id: userId })
         } catch (error) {
             console.log(error)
             return error

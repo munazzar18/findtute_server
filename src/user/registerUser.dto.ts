@@ -18,9 +18,47 @@ export class RegisterUserDto {
     @IsNotEmpty()
     roles: Role;
 
+    @ApiProperty()
+    first_name: string;
+
+    @ApiProperty()
+    last_name: string;
+
+    @ApiProperty()
+    cnic: string;
+
+    @ApiProperty()
+    mobile: string;
+
+    @ApiProperty()
+    latitude: number;
+
+    @ApiProperty()
+    longitude: number;
+
+    @ApiProperty()
+    address: string;
+
+    @ApiProperty()
+    avatar: string;
+
+    @ApiProperty()
+    preference: string;
+
+    @ApiProperty()
+    education: Record<string, any>[];
+
+    @ApiProperty()
+    experience: Record<string, any>[];
+
+    @ApiProperty()
+    grades_ids: string[];
+
+    @ApiProperty()
+    subjects_ids: string[];
+
     otp: string;
 
     expiry_otp: number
 
-    email_verified: boolean
 }

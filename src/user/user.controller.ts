@@ -1,9 +1,11 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, ParseIntPipe, Post, Query, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import { sendJson } from '../helpers/helpers';
 import { serializedUser } from './user.entity';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './registerUser.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateUserProfileDto } from './updateUserProfile.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 
 @Controller('user')
@@ -65,6 +67,24 @@ export class UserController {
     @Post('sendmail')
     async sendMail(@Body("email") email: string) {
         return await this.userService.sendMail(email)
+    }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @UseGuards(AuthGuard)
+    @Put('/update-profile/:id')
+    async updateProfile(@Param('id') id: string, @Body() updateData: UpdateUserProfileDto, @Request() req) {
+        try {
+            const authUser = req.user;
+            const updatedUser = await this.userService.updateUserProfile(id, updateData, authUser);
+            const savedUser = new serializedUser(updatedUser);
+            return sendJson(true, 'Profile updated successfully', savedUser);
+        } catch (error) {
+            if (error instanceof HttpException) {
+                return error;
+            }
+            console.error(error);
+            return sendJson(false, 'Failed to update profile', { message: error.message });
+        }
     }
 
 }

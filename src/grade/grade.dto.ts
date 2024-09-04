@@ -9,5 +9,5 @@ export class CreateGradeDTO {
     @IsNotEmpty()
     grade: string
 
-    profile_id: string
+    user_id: string
 }

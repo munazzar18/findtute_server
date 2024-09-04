@@ -27,8 +27,8 @@ export class GradeController {
     }
 
     @Get('/profile/:id')
-    async findOneByProfileId(@Param('id') profileId: string) {
-        return await this.gradeService.findOneByProfileId(profileId)
+    async findOneByuserId(@Param('id') userId: string) {
+        return await this.gradeService.findOneByuserId(userId)
     }
 
     @Post()

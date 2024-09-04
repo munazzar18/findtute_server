@@ -1,4 +1,4 @@
-import { ProfileEntity } from "src/profile/profile.entity";
+import { UserEntity } from "src/user/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 
@@ -15,17 +15,17 @@ export class GradeEntity {
     created_at: Date;
 
 
-    @ManyToMany(() => ProfileEntity, (profile) => profile.grades)
+    @ManyToMany(() => UserEntity, (user) => user.grades)
     @JoinTable({
-        name: 'profile_grade',
+        name: 'user_grade',
         joinColumn: {
             name: 'grade_id',
             referencedColumnName: 'id'
         },
         inverseJoinColumn: {
-            name: 'profile_id',
+            name: 'user_id',
             referencedColumnName: 'id'
         }
     })
-    profiles: ProfileEntity[]
+    users: UserEntity[]
 }

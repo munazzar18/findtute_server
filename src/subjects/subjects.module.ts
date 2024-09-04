@@ -3,7 +3,6 @@ import { SubjectsController } from './subjects.controller';
 import { SubjectsService } from './subjects.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SubjectsEntity } from './subjects.entity';
-import { ProfileEntity } from 'src/profile/profile.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
 import { UserEntity } from 'src/user/user.entity';
@@ -15,7 +14,7 @@ import { EncryptionService } from 'src/encryption/encryption.service';
     JwtModule.register({
       secret: JwtConstants.secret
     }),
-    TypeOrmModule.forFeature([SubjectsEntity, ProfileEntity, UserEntity])
+    TypeOrmModule.forFeature([SubjectsEntity, UserEntity])
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService, UserService, EncryptionService]

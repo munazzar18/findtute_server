@@ -6,10 +6,12 @@ import { UserEntity } from './user.entity';
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
+import { GradeEntity } from 'src/grade/grade.entity';
+import { SubjectsEntity } from 'src/subjects/subjects.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([UserEntity, GradeEntity, SubjectsEntity]),
     JwtModule.register({
       secret: JwtConstants.secret
     })

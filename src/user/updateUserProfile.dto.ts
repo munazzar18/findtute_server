@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, IsNumber, IsBoolean, IsArray, IsOptional } from 'class-validator';
 
-export class ProfileDto {
+export class UpdateUserProfileDto {
 
     @ApiProperty()
     @IsNotEmpty()
@@ -58,23 +58,15 @@ export class ProfileDto {
     @IsArray()
     experience: Record<string, any>[];
 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsArray()
-    @IsString({ each: true })
+    // @ApiProperty()
+    // @IsNotEmpty()
+    // @IsArray()
+    // @IsString({ each: true })
     grades_ids: string[];
 
-    @ApiProperty()
-    @IsNotEmpty()
-    @IsArray()
-    @IsString({ each: true })
+    // @ApiProperty()
+    // @IsNotEmpty()
+    // @IsArray()
+    // @IsString({ each: true })
     subjects_ids: string[];
-
-    is_active: boolean;
-
-    is_deleted: boolean;
-
-    is_verified: boolean;
-
-    user_id: string;
 }
