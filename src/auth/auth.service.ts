@@ -6,6 +6,8 @@ import { UserEntity, serializedUser } from 'src/user/user.entity';
 import { RegisterUserDto } from 'src/user/registerUser.dto';
 import { generateOtp } from 'src/helpers/helpers';
 import { Role } from 'src/roles/role.enum';
+import { EncryptionService } from 'src/encryption/encryption.service';
+import { ResendOTPDTO } from 'src/user/resendOTP.dto';
 // import { Twilio } from 'twilio';
 
 @Injectable()
@@ -13,7 +15,8 @@ export class AuthService {
     // public twilioClient: Twilio;
     constructor(
         private userService: UserService,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private encryptService: EncryptionService
     ) { }
 
     async validateUser(email: string, password: string) {
@@ -123,6 +126,89 @@ export class AuthService {
 
 
         }
+    }
+
+    async forgotPassword(email: string) {
+        try {
+            const user = await this.userService.findOneByEmail(email)
+            if (!user) {
+                throw new HttpException('user with this email does not exist', HttpStatus.NOT_FOUND)
+            }
+
+            const otp_service = await generateOtp()
+            const otp = otp_service.OTP
+            const expiry_otp = otp_service.expiryTime
+            await this.userService.updateUser(user.id, { otp, expiry_otp })
+            const data = await this.userService.sendMail(email, otp)
+            return
+        } catch (error) {
+            throw new Error(`Something went wrong. Error: ${error}`)
+        }
+    }
+
+    async resetPassword(email: string, password: string, otp: string) {
+        const getMail = await this.encryptService.decrypt(email)
+
+        const user = await this.userService.findOneByEmail(getMail)
+        if (!user) {
+            throw new HttpException('user with this email does not exist', HttpStatus.NOT_FOUND)
+        }
+        else {
+            const expiry = user.expiry_otp
+            const dbOtp = user.otp
+            const currentTime = new Date().getTime()
+
+            if (expiry >= currentTime) {
+                if (otp === dbOtp) {
+                    const updatedUser = await this.userService.updateUser(user.id, { password: encodedPass(password) });
+                    console.log("RETURNED DATA:", updatedUser)
+                    return updatedUser
+                }
+                else {
+                    throw new BadRequestException("OTP is incorrect")
+                }
+            } else {
+                throw new BadRequestException("OTP Expired")
+            }
+        }
+    }
+
+
+    async resendOTP(email: ResendOTPDTO) {
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isEmail = emailRegex.test(email.email);
+
+        if (!isEmail) {
+
+            const getMail = await this.encryptService.decrypt(email.email)
+            const user = await this.userService.findOneByEmail(getMail)
+            if (!user) {
+                throw new HttpException('user with this email does not exist', HttpStatus.NOT_FOUND)
+            }
+            else {
+                const otp_service = await generateOtp()
+                const otp = otp_service.OTP
+                const expiry_otp = otp_service.expiryTime
+                await this.userService.updateUser(user.id, { otp, expiry_otp })
+                await this.userService.resendOTPMail(getMail, otp)
+                return
+            }
+        } else {
+            const user = await this.userService.findOneByEmail(email.email)
+            if (!user) {
+                throw new HttpException('user with this email does not exist', HttpStatus.NOT_FOUND)
+            }
+            else {
+                const otp_service = await generateOtp()
+                const otp = otp_service.OTP
+                const expiry_otp = otp_service.expiryTime
+                await this.userService.updateUser(user.id, { otp, expiry_otp })
+                await this.userService.resendOTPMail(email.email, otp)
+                return
+            }
+        }
+
     }
 
 }

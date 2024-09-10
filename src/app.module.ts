@@ -12,6 +12,7 @@ import { GradeModule } from './grade/grade.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SubjectsModule } from './subjects/subjects.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -34,19 +35,23 @@ import { SubjectsModule } from './subjects/subjects.module';
       transport: {
         host: process.env.MAIL_HOST,
         port: parseInt(process.env.MAIL_PORT),
-        secure: true,
+        // secure: true,
         auth: {
           user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_PASS
         }
       },
-      defaults: {
-        from: '"No Reply" <noreply@findtute.com>',
-        replyTo: 'noreply@findtute.com',
-      },
+      // defaults: {
+      //   from: '"No Reply" <noreply@findtute.com>',
+      //   replyTo: 'noreply@findtute.com',
+      // },
+    }),
+    MulterModule.register({
+      dest: './public/uploads/',
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
+      serveRoot: '/public/',
     }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({
@@ -64,5 +69,5 @@ import { SubjectsModule } from './subjects/subjects.module';
   providers: [],
 })
 
-
 export class AppModule { }
+

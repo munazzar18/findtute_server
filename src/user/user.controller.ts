@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Request, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { sendJson } from '../helpers/helpers';
 import { serializedUser } from './user.entity';
 import { UserService } from './user.service';
@@ -6,6 +6,10 @@ import { RegisterUserDto } from './registerUser.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { UpdateUserProfileDto } from './updateUserProfile.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname, join } from 'path';
+import { UploadFileDto } from './uploadFile.dto';
 
 
 @Controller('user')
@@ -65,8 +69,8 @@ export class UserController {
     }
 
     @Post('sendmail')
-    async sendMail(@Body("email") email: string) {
-        return await this.userService.sendMail(email)
+    async sendMail(@Body("email") email: string, otp: string) {
+        return await this.userService.sendMail(email, otp)
     }
 
     @UseInterceptors(ClassSerializerInterceptor)
@@ -85,6 +89,26 @@ export class UserController {
             console.error(error);
             return sendJson(false, 'Failed to update profile', { message: error.message });
         }
+    }
+
+    @Post('upload')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './public/uploads/',
+            filename: (req, file, callback) => {
+                const orginalName = file.originalname;
+                const extention = extname(orginalName)
+                const fileName = Date.now() + extention;
+                callback(null, fileName)
+            }
+        }),
+        limits: { fileSize: 5 * 1024 * 1024 },
+    }))
+
+    uploadImage(@Body() data: UploadFileDto, @UploadedFile() file: Express.Multer.File, @Request() req) {
+
+        const fileUrl = '/public/uploads/' + file.filename;
+        return sendJson(true, 'Images uploaded successfully', fileUrl)
     }
 
 }

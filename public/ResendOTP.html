@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #f7941e;
+        }
+
+        p {
+            color: black;
+            line-height: 1.5;
+        }
+
+        .verification-code {
+            font-size: 18px;
+            font-weight: bold;
+            color: #4caf50;
+            margin-top: 10px;
+        }
+
+        .verification-link {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1CBBB4;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 3px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 800;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Hi [User Name],</h2>
+        <p>You have requested to resend one time password, this is your new One Time Password:</p>
+        <p class="verification-link">[Verification Code]</p>
+        <p>This one time password will expire in 3 minutes</p>
+        <p>If you did not request this verification, please ignore this email</p>
+        <div>
+            <p style="color: #f7941e;">Best Regards, <br />Findtute Team<br />
+                <a style="text-decoration: none" target="_blank" href="https://www.findtute.com/">www.findtute.com</a>
+            </p>
+        </div>
+
+    </div>
+</body>
+
+</html>

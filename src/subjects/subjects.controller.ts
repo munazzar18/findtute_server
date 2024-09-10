@@ -10,7 +10,7 @@ import { SubjectsDto } from './subjects.dto';
 
 @Controller('subjects')
 @ApiTags('subjects')
-@UseGuards(AuthGuard)
+
 export class SubjectsController {
     constructor(
         private subjectService: SubjectsService
@@ -48,7 +48,7 @@ export class SubjectsController {
         }
     }
 
-    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
     @Post()
     async create(@Body() data: SubjectsDto) {
@@ -61,7 +61,7 @@ export class SubjectsController {
     }
 
 
-    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
     @Put('/:id')
     async update(@Param('id') id: string, @Body() updateData: Partial<SubjectsDto>) {

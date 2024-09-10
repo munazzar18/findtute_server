@@ -39,34 +39,21 @@ export class UpdateUserProfileDto {
     address: string;
 
     @ApiProperty()
-    @IsOptional()
-    @IsString()
     avatar: string;
 
     @ApiProperty()
-    @IsOptional()
-    @IsString()
     preference: string;
 
     @ApiProperty()
     @IsNotEmpty()
-    @IsArray()
     education: Record<string, any>[];
 
     @ApiProperty()
-    @IsOptional()
-    @IsArray()
     experience: Record<string, any>[];
 
-    // @ApiProperty()
-    // @IsNotEmpty()
-    // @IsArray()
-    // @IsString({ each: true })
+    @ApiProperty()
     grades_ids: string[];
 
-    // @ApiProperty()
-    // @IsNotEmpty()
-    // @IsArray()
-    // @IsString({ each: true })
+    @ApiProperty()
     subjects_ids: string[];
 }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { RegisterUserDto } from './registerUser.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 // import { Twilio } from 'twilio';
@@ -9,17 +9,19 @@ import { EncryptionService } from 'src/encryption/encryption.service';
 import * as path from 'path';
 import { promises as fs } from 'fs';
 import { UpdateUserProfileDto } from './updateUserProfile.dto';
+import { SubjectsEntity } from 'src/subjects/subjects.entity';
+import { GradeEntity } from 'src/grade/grade.entity';
 
 
 @Injectable()
 export class UserService {
     // private twilioClient: Twilio;
     constructor(
-        @InjectRepository(UserEntity)
-        private userRepo: Repository<UserEntity>,
+        @InjectRepository(UserEntity) private userRepo: Repository<UserEntity>,
+        @InjectRepository(SubjectsEntity) private subjectRepo: Repository<SubjectsEntity>,
+        @InjectRepository(GradeEntity) private gradeRepo: Repository<GradeEntity>,
         private readonly mailerService: MailerService,
         private readonly encryptService: EncryptionService
-
     ) { }
 
     async findAll() {
@@ -40,7 +42,13 @@ export class UserService {
 
     async updateUserProfile(id: string, updateData: UpdateUserProfileDto, authUser: UserEntity) {
         try {
-            const getUser = await this.userRepo.findOneBy({ id, is_deleted: false });
+            const getUser = await this.userRepo.findOne({
+                where: {
+                    id,
+                    is_deleted: false
+                },
+                relations: ['grades', 'subjects']
+            });
             if (!getUser) {
                 throw new Error('User profile is not found');
             }
@@ -52,6 +60,30 @@ export class UserService {
             if (authUser.id !== id) {
                 throw new Error('You are not authorized to update this user profile');
             }
+
+            const subjectsIdsArray = Array.isArray(updateData.subjects_ids) ?
+                updateData.subjects_ids : JSON.parse(updateData.subjects_ids);
+            const gradesIdsArray = Array.isArray(updateData.grades_ids) ?
+                updateData.grades_ids : JSON.parse(updateData.grades_ids);
+
+
+
+
+            updateData.subjects_ids = subjectsIdsArray.map(id => id.toString());
+            updateData.grades_ids = gradesIdsArray.map(id => id.toString());
+
+
+            const subjects = await this.subjectRepo.find({
+                where: { id: In(updateData.subjects_ids) }
+            });
+
+            const grades = await this.gradeRepo.find({
+                where: { id: In(updateData.grades_ids) }
+            });
+
+
+            getUser.grades = grades
+            getUser.subjects = subjects
 
             const updatedUser = await this.userRepo.save({
                 ...getUser,
@@ -89,10 +121,10 @@ export class UserService {
         const encrypted = await this.encryptService.encrypt(email)
         const dycrypted = await this.encryptService.decrypt(encrypted)
         await this.mailerService.sendMail({
-            to: email, // List of receivers email address
-            from: 'noreply@findtute.com', // Senders email address
-            subject: 'FindTute email verification code', // Subject line
-            html: emailHtml, // HTML body content
+            to: email,
+            from: 'noreply@findtute.com',
+            subject: 'FindTute email verification code',
+            html: emailHtml,
         })
             .then((success) => {
                 console.log("Verification email sent successfully:", success)
@@ -107,27 +139,31 @@ export class UserService {
         }
     }
 
-    async sendMail(email: string) {
+    async sendMail(email: string, otp: string) {
+
+        const templatePath = path.join(__dirname, '..', '..', 'public', 'forgotPassword.html');
+
+        let emailHtml = await fs.readFile(templatePath, 'utf-8')
+
         const encrypted = await this.encryptService.encrypt(email)
-        const url = `https://localhost:3500/${encrypted}`
+        const url = `http://localhost:3000/auth/reset-password/${encrypted}`
         const dycrypted = await this.encryptService.decrypt(encrypted)
+
+        emailHtml = emailHtml.replace('[User Name]', email)
+        emailHtml = emailHtml.replace('[Verification Code]', otp)
+        emailHtml = emailHtml.replace('[Verification Link]', url)
+
         await this.mailerService.sendMail({
-            to: email, // List of receivers email address
-            from: 'teachu@info.com', // Senders email address
-            subject: 'Password reset link', // Subject line
-            html: `<p><b>Please do not reply to this message.</b> This is the link to reset your password, this link will expired in 30 minutes.</p>
-               <br>Click this link to rest the password:</br>
-               <br>
-               <a href=${url}>
-                 ${url}
-               </a>
-               </br>`, // HTML body content
+            to: email,
+            from: 'noreply@findtute.com',
+            subject: 'Password reset link',
+            html: emailHtml,
         })
             .then((success) => {
-                console.log("Success:", success)
+                console.log("Verification email sent successfully:", success)
             })
             .catch((err) => {
-                console.log("ERROR AYA HA:", err)
+                console.log("Verification email not sent:", err)
             });
 
         return {
@@ -152,4 +188,35 @@ export class UserService {
             throw new BadRequestException("OTP Expired")
         }
     }
+
+    async resendOTPMail(email: string, otp: string) {
+        const templatePath = path.join(__dirname, '..', '..', 'public', 'ResendOTP.html');
+
+
+        let emailHtml = await fs.readFile(templatePath, 'utf-8')
+
+        emailHtml = emailHtml.replace('[User Name]', email)
+        emailHtml = emailHtml.replace('[Verification Code]', otp)
+
+        const encrypted = await this.encryptService.encrypt(email)
+        const dycrypted = await this.encryptService.decrypt(encrypted)
+        await this.mailerService.sendMail({
+            to: email,
+            from: 'noreply@findtute.com',
+            subject: 'FindTute email verification code',
+            html: emailHtml,
+        })
+            .then((success) => {
+                console.log("One time password is sent successfully:", success)
+            })
+            .catch((err) => {
+                console.log("One time password is not sent:", err)
+            });
+
+        return {
+            otp: otp,
+            decryptData: dycrypted,
+        }
+    }
+
 }

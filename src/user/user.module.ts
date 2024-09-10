@@ -8,16 +8,18 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
 import { GradeEntity } from 'src/grade/grade.entity';
 import { SubjectsEntity } from 'src/subjects/subjects.entity';
+import { GradeService } from 'src/grade/grade.service';
+import { SubjectsService } from 'src/subjects/subjects.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, GradeEntity, SubjectsEntity]),
+    TypeOrmModule.forFeature([UserEntity, GradeEntity, SubjectsEntity, SubjectsEntity, GradeEntity]),
     JwtModule.register({
       secret: JwtConstants.secret
     })
   ],
   controllers: [UserController],
-  providers: [UserService, EncryptionService],
+  providers: [UserService, EncryptionService, GradeService, SubjectsService],
   exports: [UserService]
 })
 export class UserModule { }

@@ -82,17 +82,10 @@ export class UserEntity {
     @CreateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
 
-    @Column({ nullable: true })
-    grades_id: string
-
-    @Column({ nullable: true })
-    subjects_id: string
-
-
-    @ManyToMany(() => GradeEntity, (grade) => grade.users)
+    @ManyToMany(() => GradeEntity, (grade) => grade.users, { cascade: true })
     grades: GradeEntity[]
 
-    @ManyToMany(() => SubjectsEntity, (subject) => subject.users)
+    @ManyToMany(() => SubjectsEntity, (subject) => subject.users, { cascade: true })
     subjects: SubjectsEntity[]
 
 }
