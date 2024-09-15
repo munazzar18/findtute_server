@@ -73,8 +73,8 @@ export class UserEntity {
     @Column({ nullable: true, default: false })
     is_online: boolean;
 
-    @Column({ nullable: true, default: false })
-    is_authorized: boolean;
+    @Column({ nullable: true })
+    is_authorized: string;
 
     @CreateDateColumn({ type: 'timestamptz' })
     created_at: Date;
