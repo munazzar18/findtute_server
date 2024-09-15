@@ -13,24 +13,15 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { SubjectsModule } from './subjects/subjects.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { dataSourceOptions } from 'data-source';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env', '.env.development', 'env.production']
+      envFilePath: ['.env']
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DB_URL || undefined,
-      host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT, 10),
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-    }),
+    TypeOrmModule.forRoot(dataSourceOptions),
     MailerModule.forRoot({
       transport: {
         host: process.env.MAIL_HOST,
@@ -70,4 +61,6 @@ import { MulterModule } from '@nestjs/platform-express';
 })
 
 export class AppModule { }
+
+
 
