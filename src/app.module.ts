@@ -14,12 +14,13 @@ import { join } from 'path';
 import { SubjectsModule } from './subjects/subjects.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { dataSourceOptions } from 'data-source';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: ['.env']
+      envFilePath: ['.env'],
     }),
     TypeOrmModule.forRoot(dataSourceOptions),
     MailerModule.forRoot({
@@ -55,6 +56,7 @@ import { dataSourceOptions } from 'data-source';
     EncryptionModule,
     GradeModule,
     SubjectsModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [],

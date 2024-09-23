@@ -110,7 +110,8 @@ export class UserService {
     async sendOTPMail(email: string, otp: string) {
 
         // const templatePath = path.join(__dirname, '../templates/OTP.html')
-        const templatePath = path.join(__dirname, '..', '..', 'public', 'OTP.html');
+        // const templatePath = path.join(__dirname, '..', '..', 'public', 'OTP.html');
+        const templatePath = path.join(process.cwd(), 'public', 'OTP.html');
 
 
         let emailHtml = await fs.readFile(templatePath, 'utf-8')
@@ -141,12 +142,14 @@ export class UserService {
 
     async sendMail(email: string, otp: string) {
 
-        const templatePath = path.join(__dirname, '..', '..', 'public', 'forgotPassword.html');
+        // const templatePath = path.join(__dirname, '..', '..', 'public', 'forgotPassword.html');
+        const templatePath = path.join(process.cwd(), 'public', 'forgotPassword.html');
 
         let emailHtml = await fs.readFile(templatePath, 'utf-8')
 
         const encrypted = await this.encryptService.encrypt(email)
-        const url = `http://localhost:3000/auth/reset-password/${encrypted}`
+        const frontUrl = process.env.FORGOT_PASSWORD_URl
+        const url = `${frontUrl}/${encrypted}`
         const dycrypted = await this.encryptService.decrypt(encrypted)
 
         emailHtml = emailHtml.replace('[User Name]', email)
@@ -190,7 +193,8 @@ export class UserService {
     }
 
     async resendOTPMail(email: string, otp: string) {
-        const templatePath = path.join(__dirname, '..', '..', 'public', 'ResendOTP.html');
+        // const templatePath = path.join(__dirname, '..', '..', 'public', 'ResendOTP.html');
+        const templatePath = path.join(process.cwd(), 'public', 'ResendOTP.html');
 
 
         let emailHtml = await fs.readFile(templatePath, 'utf-8')
