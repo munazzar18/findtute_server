@@ -1,0 +1,45 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20.17.0'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build project
+        run: npm run build
+
+      - name: Deploy to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > key.pem
+          chmod 600 key.pem
+          scp -o StrictHostKeyChecking=no -i key.pem -r ./* $USER@$HOST:/home/ubuntu/findtute_server
+          scp -o StrictHostKeyChecking=no -i key.pem .env $USER@$HOST:/home/ubuntu/findtute_server
+          ssh -o StrictHostKeyChecking=no -i key.pem $USER@$HOST << EOF
+            cd /home/ubuntu/findtute_server
+            npm install
+            npm run build
+            pm2 restart dist/main.js --name findtute_server --update-env --env production || pm2 start dist/main.js --name findtute_server --update-env --env production
+          EOF

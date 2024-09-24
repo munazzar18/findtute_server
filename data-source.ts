@@ -1,3 +1,6 @@
+import { GradeEntity } from "src/grade/grade.entity";
+import { SubjectsEntity } from "src/subjects/subjects.entity";
+import { UserEntity } from "src/user/user.entity";
 import { DataSource, DataSourceOptions } from "typeorm";
 
 
@@ -9,7 +12,7 @@ export const dataSourceOptions: DataSourceOptions = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [__dirname + '/**/*.entity{.ts,.js}'],
+    entities: [UserEntity, SubjectsEntity, GradeEntity],
     migrationsTableName: "migrations",
     migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
     synchronize: false,
