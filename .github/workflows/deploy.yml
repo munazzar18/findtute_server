@@ -24,6 +24,9 @@ jobs:
       - name: Run build
         run: npm run build # Ensure you have a build script in package.json
 
+      - name: Remove previous SSH key for the host
+        run: ssh-keygen -R 13.60.65.68 # Replace with your EC2 instance's IP
+
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.4
         with:
