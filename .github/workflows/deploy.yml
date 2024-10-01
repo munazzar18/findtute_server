@@ -21,6 +21,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate Migrations
+        run: npm run migration:generate
+
+      - name: Run migrations
+        run: npm run migration:run
+
       - name: Run build
         run: npm run build # Ensure you have a build script in package.json
 
@@ -32,7 +38,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key added as a secret
           port: 22
           script: |
-            cd ~/findtute_server  # Adjust to your directory
+            cd ~/findtute-server  # Adjust to your directory
             git pull origin master  # Pull latest changes
             npm install            # Install dependencies
             npm run build           # Build the app

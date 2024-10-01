@@ -13,9 +13,29 @@ export class GradeService {
         @InjectRepository(UserEntity) private UserRepo: Repository<UserEntity>
     ) { }
 
-    async findAll() {
+    async findAll(page: number) {
+        const limit = 10
+        const skip = (page - 1) * limit
         try {
-            return await this.gradeRepo.find()
+            const [grades, total] = await this.gradeRepo.findAndCount({
+                order: {
+                    id: 'ASC'
+                },
+                skip: skip,
+                take: (page * limit)
+            })
+
+            const totalPages = Math.ceil(total / limit)
+
+            return {
+                data: grades,
+                pageData: {
+                    total,
+                    perPage: limit,
+                    currentPage: Number(page),
+                    lastPage: totalPages
+                }
+            }
         } catch (error) {
             console.log(error)
             return error

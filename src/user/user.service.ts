@@ -90,7 +90,7 @@ export class UserService {
                 ...updateData,
                 is_active: getUser.is_active,
                 is_deleted: getUser.is_deleted,
-                is_verified: getUser.is_verified,
+                is_verified: true,
                 is_online: getUser.is_online,
                 is_Authorized: getUser.is_authorized,
             });

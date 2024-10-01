@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { GradeService } from './grade.service';
 import { CreateGradeDTO } from './grade.dto';
@@ -17,13 +17,16 @@ export class GradeController {
     ) { }
 
     @Get()
-    async findAll() {
-        return await this.gradeService.findAll()
+    async findAll(
+        @Query('page') page: number
+    ) {
+        return await this.gradeService.findAll(page)
     }
 
     @Get('/id/:id')
     async findOneById(@Param('id') id: string) {
-        return await this.gradeService.findOneById(id)
+        const grade = await this.gradeService.findOneById(id)
+        return sendJson(true, 'Grade by id fetched', grade)
     }
 
     @Get('/profile/:id')

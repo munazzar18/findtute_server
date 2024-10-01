@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createCipheriv, createDecipheriv, randomBytes, scrypt } from 'crypto';
 import { promisify } from 'util';
+import * as CryptoJS from 'crypto-js';
 
 @Injectable()
 export class EncryptionService {
@@ -38,5 +39,36 @@ export class EncryptionService {
             decipher.final(),
         ]);
         return decryptedText.toString('utf-8');
+    }
+
+    encryptRequestHash(formData: any): string {
+        let mapString = '';
+
+        // Create the mapString by concatenating formData key-value pairs
+        for (const [key, value] of Object.entries(formData)) {
+            if (key !== 'HS_RequestHash' && key !== 'Key1' && key !== 'Key2') {
+                mapString += `${key}=${value}&`;
+            }
+        }
+
+        // Remove trailing '&'
+        mapString = mapString.slice(0, -1);
+
+        // Encrypt the mapString using AES/CBC/PKCS7Padding
+        const key1 = CryptoJS.enc.Utf8.parse(formData.Key1);
+        const key2 = CryptoJS.enc.Utf8.parse(formData.Key2);
+
+        const encrypted = CryptoJS.AES.encrypt(
+            CryptoJS.enc.Utf8.parse(mapString),
+            key1,
+            {
+                iv: key2,
+                mode: CryptoJS.mode.CBC,
+                padding: CryptoJS.pad.Pkcs7,
+            },
+        );
+
+        // Return encrypted data as base64 string
+        return encrypted.toString();
     }
 }

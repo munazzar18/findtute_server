@@ -8,3 +8,14 @@ export function encodedPass(rawPassword: string) {
 export function comparePass(rawPassword: string, hash: string) {
     return bcrypt.compareSync(rawPassword, hash)
 }
+
+
+export function encodedToken(token: string) {
+    const SALT = bcrypt.genSaltSync()
+    return bcrypt.hashSync(token, SALT)
+}
+
+
+export function compareToken(token: string, hash: string) {
+    return bcrypt.compareSync(token, hash)
+}

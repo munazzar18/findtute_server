@@ -1,3 +1,4 @@
+
 export const sendJson = (status: boolean, message: string, data?: any) => {
     return {
         status: status,
@@ -15,3 +16,19 @@ export const generateOtp = async () => {
         expiryTime
     }
 }
+
+
+export const generateRandomString = (length: number) => {
+    const characters =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let result = ''
+    const charactersLength = characters.length
+
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength))
+    }
+
+    return result
+}
+
+

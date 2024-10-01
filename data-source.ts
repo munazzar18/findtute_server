@@ -4,6 +4,7 @@ import { UserEntity } from "src/user/user.entity";
 import { DataSource, DataSourceOptions } from "typeorm";
 
 import { ConfigModule } from '@nestjs/config';
+import { ApplicationEntity } from "src/application/application.entity";
 
 ConfigModule.forRoot({
     envFilePath: ['.env', '.env.development', 'env.production']
@@ -18,7 +19,7 @@ export const dataSourceOptions: DataSourceOptions = {
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
-    entities: [UserEntity, SubjectsEntity, GradeEntity],
+    entities: [UserEntity, SubjectsEntity, GradeEntity, ApplicationEntity],
     migrationsTableName: "migrations",
     migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
     synchronize: false,

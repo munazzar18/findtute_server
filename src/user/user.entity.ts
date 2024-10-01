@@ -3,17 +3,24 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, On
 import { Exclude } from "class-transformer";
 import { GradeEntity } from "src/grade/grade.entity";
 import { SubjectsEntity } from "src/subjects/subjects.entity";
+import { ApplicationEntity } from "src/application/application.entity";
 
 @Entity()
 export class UserEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Column({ nullable: false, default: "username" })
+    username: string;
+
     @Column({ unique: true, nullable: false })
     email: string;
 
     @Column({ nullable: false })
     password: string;
+
+    @Column({ nullable: false, default: false })
+    privacy_terms_conditions: boolean;
 
     @Column({ nullable: true })
     otp: string;
@@ -41,13 +48,28 @@ export class UserEntity {
     mobile: string;
 
     @Column({ type: "double precision", nullable: true })
-    latitude: number;
+    lattitude: number;
 
     @Column({ type: 'double precision', nullable: true })
     longitude: number;
 
     @Column({ nullable: true })
     address: string;
+
+    @Column({ nullable: true })
+    city: string;
+
+    @Column({ nullable: true })
+    state: string;
+
+    @Column({ nullable: true })
+    country: string;
+
+    @Column({ nullable: true })
+    hourly_rate: number;
+
+    @Column({ nullable: true })
+    monthly_rate: number;
 
     @Column({ nullable: true })
     avatar: string;
@@ -81,6 +103,10 @@ export class UserEntity {
 
     @CreateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
+
+    @OneToOne(() => ApplicationEntity, (application) => application.user)
+    @JoinColumn()
+    application: ApplicationEntity
 
     @ManyToMany(() => GradeEntity, (grade) => grade.users, { cascade: true })
     grades: GradeEntity[]

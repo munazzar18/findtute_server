@@ -4,6 +4,11 @@ import { Role } from "src/roles/role.enum";
 
 
 export class RegisterUserDto {
+
+    @ApiProperty()
+    @IsNotEmpty()
+    username: string
+
     @ApiProperty()
     @IsEmail()
     @IsNotEmpty()
@@ -17,6 +22,10 @@ export class RegisterUserDto {
     @ApiProperty()
     @IsNotEmpty()
     roles: Role;
+
+    @ApiProperty()
+    @IsNotEmpty()
+    privacy_terms_conditions: boolean;
 
     @ApiProperty()
     first_name: string;

@@ -26,7 +26,7 @@ export class UpdateUserProfileDto {
     @ApiProperty()
     @IsNotEmpty()
     @IsNumber()
-    latitude: number;
+    lattitude: number;
 
     @ApiProperty()
     @IsNotEmpty()

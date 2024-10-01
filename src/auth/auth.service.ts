@@ -37,6 +37,7 @@ export class AuthService {
 
     async login(user: any) {
         const payload = {
+            username: user.username,
             email: user.email,
             id: user.id,
             role: user.roles
@@ -45,6 +46,7 @@ export class AuthService {
         return {
             access_token: accessToken,
             user: {
+                username: payload.username,
                 email: payload.email,
                 id: payload.id,
                 role: payload.role
@@ -69,6 +71,7 @@ export class AuthService {
                     await this.userService.updateUser(user.id, { email_verified: true });
 
                     const newUser = {
+                        username: user.username,
                         email: user.email,
                         id: user.id,
                         role: user.roles,
@@ -108,10 +111,11 @@ export class AuthService {
 
 
             const payload = {
+                username: newUser.username,
                 email: newUser.email,
                 id: newUser.id,
                 role: newUser.roles,
-                email_verified: newUser.email_verified
+                email_verified: newUser.email_verified,
             }
             return payload
             const accessToken = this.jwtService.sign(payload);

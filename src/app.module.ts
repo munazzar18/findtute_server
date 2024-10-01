@@ -15,6 +15,10 @@ import { SubjectsModule } from './subjects/subjects.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { dataSourceOptions } from 'data-source';
 import { ChatModule } from './chat/chat.module';
+import { ApplicationModule } from './application/application.module';
+import { CountryStateCityModule } from './country-state-city/country-state-city.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -27,7 +31,7 @@ import { ChatModule } from './chat/chat.module';
       transport: {
         host: process.env.MAIL_HOST,
         port: parseInt(process.env.MAIL_PORT),
-        // secure: true,
+        secure: true,
         auth: {
           user: process.env.MAIL_USERNAME,
           pass: process.env.MAIL_PASS
@@ -56,7 +60,11 @@ import { ChatModule } from './chat/chat.module';
     EncryptionModule,
     GradeModule,
     SubjectsModule,
-    ChatModule
+    ChatModule,
+    ApplicationModule,
+    CountryStateCityModule,
+    DashboardModule,
+    PaymentModule
   ],
   controllers: [AppController],
   providers: [],

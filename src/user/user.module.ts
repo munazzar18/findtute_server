@@ -10,10 +10,11 @@ import { GradeEntity } from 'src/grade/grade.entity';
 import { SubjectsEntity } from 'src/subjects/subjects.entity';
 import { GradeService } from 'src/grade/grade.service';
 import { SubjectsService } from 'src/subjects/subjects.service';
+import { ApplicationEntity } from 'src/application/application.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, GradeEntity, SubjectsEntity, SubjectsEntity, GradeEntity]),
+    TypeOrmModule.forFeature([UserEntity, GradeEntity, SubjectsEntity, SubjectsEntity, GradeEntity, ApplicationEntity]),
     JwtModule.register({
       secret: JwtConstants.secret
     })

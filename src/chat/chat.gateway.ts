@@ -88,6 +88,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     @SubscribeMessage('signal')
     handleSignal(@MessageBody() data: any, @ConnectedSocket() socket: Socket) {
+        console.log("I am signal")
         this.logger.log(`Signal from User ID ${data.userId} in room ${data.room}`)
         const { room, signalData } = data;
         socket.to(room).emit('signal', signalData);
