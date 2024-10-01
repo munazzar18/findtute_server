@@ -21,12 +21,6 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Generate Migrations
-        run: npm run migration:generate
-
-      - name: Run migrations
-        run: npm run migration:run
-
       - name: Run build
         run: npm run build # Ensure you have a build script in package.json
 
@@ -41,7 +35,7 @@ jobs:
             cd ~/findtute-server  # Adjust to your directory
             git pull origin master  # Pull latest changes
             npm install            # Install dependencies
-            npm run migration:generate  # Generate migrations
-            npm run migration:run      # Run migrations
+            npm run migration:generate  # Generate migrations (on EC2 where DB is configured)
+            npm run migration:run      # Run migrations (on EC2 where DB is configured)
             npm run build           # Build the app
             pm2 restart all         # Restart the server using PM2
