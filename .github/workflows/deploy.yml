@@ -41,5 +41,7 @@ jobs:
             cd ~/findtute-server  # Adjust to your directory
             git pull origin master  # Pull latest changes
             npm install            # Install dependencies
+            npm run migration:generate  # Generate migrations
+            npm run migration:run      # Run migrations
             npm run build           # Build the app
             pm2 restart all         # Restart the server using PM2
