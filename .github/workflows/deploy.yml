@@ -25,6 +25,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
+          debug: true
           script: |
             cd ~/findtute-server  # Adjust this path to where the deploy.sh is located
             bash deploy.sh         # Run the deploy.sh script
