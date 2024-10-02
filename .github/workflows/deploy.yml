@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches:
-      - master # Adjust branch name if necessary
+      - master
 
 jobs:
   deploy:
@@ -16,26 +16,15 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '20.17.0' # Adjust Node version as needed
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run build
-        run: npm run build # Ensure you have a build script in package.json
+          node-version: '20.17.0'
 
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v0.1.4
         with:
-          host: ${{ secrets.EC2_HOST }} # Your EC2 public IP
-          username: ${{ secrets.EC2_USER }} # EC2 user, typically 'ubuntu' or 'ec2-user'
-          key: ${{ secrets.EC2_SSH_KEY }} # Your private SSH key added as a secret
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            cd ~/findtute-server  # Adjust to your directory
-            git pull origin master  # Pull latest changes
-            npm install            # Install dependencies
-            npm run migration:generate  # Generate migrations (on EC2 where DB is configured)
-            npm run migration:run      # Run migrations (on EC2 where DB is configured)
-            npm run build           # Build the app
-            pm2 restart all         # Restart the server using PM2
+            cd ~/findtute-server  # Adjust this path to where the deploy.sh is located
+            bash deploy.sh         # Run the deploy.sh script

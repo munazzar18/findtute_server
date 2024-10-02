@@ -2,6 +2,11 @@
 /dist
 /node_modules
 /build
+# Ignore the entire migrations folder
+# Ignore all .ts files inside the migrations folder
+src/migrations/*.ts
+
+
 
 # Logs
 logs
