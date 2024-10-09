@@ -1,0 +1,5 @@
+[phases]
+setup = "nodejs-20.17.0, npm-9_x"
+install = "npm install"
+build = "npm run build"
+start = "npm run start"
