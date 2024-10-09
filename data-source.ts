@@ -13,12 +13,12 @@ ConfigModule.forRoot({
 
 export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
-    url: process.env.DB_URL || undefined,
-    host: process.env.DB_HOST,
+    url: process.env.POSTGRES_URL || undefined,
+    host: process.env.POSTGRES_HOST,
     port: parseInt(process.env.DB_PORT, 10),
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    username: process.env.POSTGRES_USER,
+    password: process.env.POSTGRES_PASSWORD,
+    database: process.env.POSTGRES_DATABASE,
     entities: [UserEntity, SubjectsEntity, GradeEntity, ApplicationEntity],
     migrationsTableName: "migrations",
     migrations: [__dirname + '/src/migrations/*{.ts,.js}'],
