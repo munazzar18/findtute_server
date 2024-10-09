@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, Query, Request, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+
 import { GradeService } from './grade.service';
 import { CreateGradeDTO } from './grade.dto';
 import { UserEntity } from 'src/user/user.entity';
@@ -10,7 +10,7 @@ import { Role } from 'src/roles/role.enum';
 import { sendJson } from 'src/helpers/helpers';
 
 @Controller('grade')
-@ApiTags('grade')
+
 export class GradeController {
     constructor(
         private gradeService: GradeService

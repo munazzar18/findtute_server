@@ -3,7 +3,7 @@ import { sendJson } from '../helpers/helpers';
 import { serializedUser } from './user.entity';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './registerUser.dto';
-import { ApiTags } from '@nestjs/swagger';
+
 import { UpdateUserProfileDto } from './updateUserProfile.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -13,7 +13,7 @@ import { UploadFileDto } from './uploadFile.dto';
 
 
 @Controller('user')
-@ApiTags('user')
+
 export class UserController {
     constructor(private readonly userService: UserService) { }
 

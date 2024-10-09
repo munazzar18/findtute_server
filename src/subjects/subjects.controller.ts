@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { sendJson } from 'src/helpers/helpers';
-import { ApiTags } from '@nestjs/swagger';
+
 import { AuthGuard } from 'src/auth/auth.guard';
 import { RolesGuard } from 'src/roles/role.guard';
 import { Roles } from 'src/roles/role.decorator';
@@ -9,7 +9,7 @@ import { Role } from 'src/roles/role.enum';
 import { SubjectsDto } from './subjects.dto';
 
 @Controller('subjects')
-@ApiTags('subjects')
+
 
 export class SubjectsController {
     constructor(

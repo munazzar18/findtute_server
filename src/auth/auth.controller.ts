@@ -4,13 +4,12 @@ import { AuthGuard } from '@nestjs/passport';
 import { sendJson } from '../helpers/helpers';
 import { RegisterUserDto } from 'src/user/registerUser.dto';
 import { VerifyOTPDto } from './verifyOTPdto.dto';
-import { ApiTags } from '@nestjs/swagger';
+
 import { ForgotPasswordDto } from 'src/user/forgotPassword.dto';
 import { ResetPasswordDTO } from 'src/user/resetPassword.dto';
 import { ResendOTPDTO } from 'src/user/resendOTP.dto';
 
 @Controller('auth')
-@ApiTags('auth')
 export class AuthController {
     constructor(
         private authService: AuthService
