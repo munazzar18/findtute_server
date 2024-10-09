@@ -1,5 +1,11 @@
 [phases]
 setup = { runtime = "nodejs-20.17.0" }
-install = "npm install"
-build = "npm run build"
-start = "npm run start"
+
+[phases.install]
+cmds = ["npm install"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[phases.start]
+cmds = ["npm run start"]
