@@ -1,9 +1,11 @@
 import { Role } from "src/roles/role.enum";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { Exclude } from "class-transformer";
 import { GradeEntity } from "src/grade/grade.entity";
 import { SubjectsEntity } from "src/subjects/subjects.entity";
 import { ApplicationEntity } from "src/application/application.entity";
+import { ChatEntity } from "src/chat/chat.entity";
+import { RoomEntity } from "src/chat/room.entity";
 
 @Entity()
 export class UserEntity {
@@ -101,12 +103,11 @@ export class UserEntity {
     @CreateDateColumn({ type: 'timestamptz' })
     created_at: Date;
 
-    @CreateDateColumn({ type: 'timestamptz' })
+    @UpdateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
 
-    @OneToOne(() => ApplicationEntity, (application) => application.user)
-    @JoinColumn()
-    application: ApplicationEntity
+    @OneToMany(() => ApplicationEntity, (application) => application.teacher)
+    create_application: ApplicationEntity[]
 
     @ManyToMany(() => GradeEntity, (grade) => grade.users, { cascade: true })
     grades: GradeEntity[]
@@ -114,10 +115,51 @@ export class UserEntity {
     @ManyToMany(() => SubjectsEntity, (subject) => subject.users, { cascade: true })
     subjects: SubjectsEntity[]
 
+    @OneToMany(() => ChatEntity, (chat) => chat.owner)
+    chats: ChatEntity[];
+
+    @OneToMany(() => RoomEntity, (room) => room.owner)
+    rooms: RoomEntity[];
+
 }
 
 
 export class serializedUser {
+
+    id: string;
+    username: string;
+    email: string;
+    roles: Role;
+    email_verified: boolean;
+    first_name: string;
+    last_name: string;
+    cnic: string;
+    mobile: string;
+    lattitude: number;
+    longitude: number;
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    hourly_rate: number;
+    monthly_rate: number;
+    avatar: string;
+    preference: string;
+    education: Record<string, any>[];
+    experience: Record<string, any>[];
+    is_active: boolean;
+    is_deleted: boolean;
+    is_verified: boolean;
+    is_online: boolean;
+    is_authorized: string;
+    created_at: Date;
+    updated_at: Date;
+    create_application: ApplicationEntity[];
+    grades: GradeEntity[];
+    subjects: SubjectsEntity[];
+    chats: ChatEntity[];
+    rooms: RoomEntity[];
+
 
     @Exclude()
     password: string;

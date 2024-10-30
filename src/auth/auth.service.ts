@@ -78,7 +78,10 @@ export class AuthService {
                         email_verified: user.email_verified
                     }
                     const accessToken = this.jwtService.sign(newUser)
-                    return accessToken
+                    return {
+                        access_token: accessToken,
+                        user: newUser
+                    }
                 }
                 else {
                     throw new BadRequestException("OTP is incorrect")

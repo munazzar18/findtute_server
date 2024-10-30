@@ -32,3 +32,9 @@ export class CreateApplicationDto {
 
     user_id: string
 }
+
+export class StudentApplyDTO {
+
+    @IsNotEmpty()
+    application_id: string
+}

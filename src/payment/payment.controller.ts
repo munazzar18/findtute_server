@@ -1,6 +1,9 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { HandshakeDto, initiateHandshakeDTO, InititateCheckoutDto } from './initiateHandshakeDto.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/roles/role.decorator';
+import { Role } from 'src/roles/role.enum';
 
 @Controller('payment')
 export class PaymentController {
@@ -25,6 +28,14 @@ export class PaymentController {
     async initiateCheckout(@Body() data: InititateCheckoutDto) {
 
         return await this.paymentService.initiateCheckout(data)
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(Role.Teacher)
+    @Post('create-payment')
+    async createPayment(@Request() req) {
+        const data = req.user
+        return await this.paymentService.createPayment(data)
     }
 
 

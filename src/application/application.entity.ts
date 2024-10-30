@@ -1,5 +1,5 @@
 import { UserEntity } from "src/user/user.entity";
-import { Column, CreateDateColumn, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
@@ -17,10 +17,10 @@ export class ApplicationEntity {
     @Column({ nullable: false })
     monthly_rate: number
 
-    @Column({ nullable: false })
+    @Column({ type: "double precision", nullable: false })
     lattitude: number
 
-    @Column({ nullable: false })
+    @Column({ type: "double precision", nullable: false })
     longitude: number
 
     @Column({ nullable: false })
@@ -44,6 +44,16 @@ export class ApplicationEntity {
     @CreateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
 
-    @OneToOne(() => UserEntity, (user) => user.application)
-    user: UserEntity
+    @ManyToOne(() => UserEntity, (user) => user.create_application)
+    teacher: UserEntity
+
+    @ManyToOne(() => UserEntity)
+    student: UserEntity
+
+    @Column({ default: false })
+    teacher_accepted: boolean
+
+    @Column({ default: false })
+    student_accepted: boolean
+
 }

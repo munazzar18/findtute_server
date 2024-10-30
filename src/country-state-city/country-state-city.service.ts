@@ -13,7 +13,7 @@ export class CountryStateCityService {
         try {
             return State.getStatesOfCountry(countryCode);
         } catch (error) {
-            throw new Error(error)
+            throw new Error(`Failed to get states of country: ${error}`);
         }
     }
 
@@ -21,7 +21,7 @@ export class CountryStateCityService {
         try {
             return City.getCitiesOfState(countryCode, stateCode);
         } catch (error) {
-            throw new Error(error)
+            throw new Error(`Failed to get cities of state: ${error}`);
         }
     }
 

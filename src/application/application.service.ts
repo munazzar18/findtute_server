@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApplicationEntity } from './application.entity';
-import { Repository } from 'typeorm';
-import { CreateApplicationDto } from './application.dto';
-import { UserEntity } from 'src/user/user.entity';
+import { DeepPartial, Repository } from 'typeorm';
+import { CreateApplicationDto, StudentApplyDTO } from './application.dto';
+import { serializedUser, UserEntity } from 'src/user/user.entity';
 import { generateRandomString } from 'src/helpers/helpers';
 import { compareToken } from 'src/auth/bcrypt';
+import { ChatService } from 'src/chat/chat.service';
 
 @Injectable()
 export class ApplicationService {
     constructor(
-        @InjectRepository(ApplicationEntity) private applicationRepo: Repository<ApplicationEntity>
+        @InjectRepository(ApplicationEntity) private applicationRepo: Repository<ApplicationEntity>,
+        private readonly chatService: ChatService
     ) { }
 
 
@@ -28,14 +30,9 @@ export class ApplicationService {
         return await this.applicationRepo.findOneBy({ user_id: id })
     }
 
-    async create(application: CreateApplicationDto, authUser: UserEntity) {
-        const user = await this.findOneByUserId(authUser.id);
+    async create(authUser: UserEntity) {
 
-        if (!user) {
-            throw new Error('User not found');
-        }
-
-        const paymentHash = authUser.is_authorized
+        const paymentHash = authUser.is_authorized;
         const token = authUser.first_name + authUser.last_name + authUser.email + authUser.id;
         const isTokenValid = compareToken(token, paymentHash);
 
@@ -46,7 +43,6 @@ export class ApplicationService {
         let randName: string;
         let isUnique = false;
 
-
         while (!isUnique) {
             randName = generateRandomString(17);
             const appExists = await this.applicationRepo.findOne({ where: { name: randName } });
@@ -56,19 +52,49 @@ export class ApplicationService {
             }
         }
 
-        return await this.applicationRepo.save({
-            name: randName,
+        const serialUser = new serializedUser(authUser);
+
+        const createApplication: DeepPartial<ApplicationEntity> = {
             preference: authUser.preference,
-            grades: authUser.grades,
-            subjects: authUser.subjects,
+            grades: authUser.grades?.map(grade => grade.grade || grade.id),
+            subjects: authUser.subjects?.map(subject => subject.subject || subject.id),
             user_id: authUser.id,
             avatar: authUser.avatar,
             hourly_rate: authUser.hourly_rate,
             monthly_rate: authUser.monthly_rate,
             lattitude: authUser.lattitude,
             longitude: authUser.longitude,
-            ...application
-        });
+            teacher: serialUser,
+            teacher_accepted: true,
+            name: randName
+        };
+
+        const application = await this.applicationRepo.save(createApplication
+        );
+
+        return application;
+    }
+
+
+    async studentApplyOnApplication(authUser: UserEntity, applicationId: StudentApplyDTO) {
+        const application = await this.findOneById(applicationId.application_id);
+        if (!application) {
+            throw new Error('Application not found');
+        }
+        application.student = authUser;
+        application.student_accepted = true;
+        application.teacher_accepted = true;
+        await this.applicationRepo.update(applicationId.application_id, (application));
+
+        const createChat = await this.chatService.findOrCreateChat(authUser.id, applicationId.application_id);
+
+        if (!createChat) {
+            throw new Error('Chat creation failed');
+        }
+
+
+        return application;
+
     }
 
 

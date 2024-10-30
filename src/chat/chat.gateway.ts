@@ -1,22 +1,16 @@
-import { UserService } from './../user/user.service';
-;
-import { Logger } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
-import { Server, Socket } from "socket.io";
-
-interface ChatMessage {
-    userId: string;
-    room: string;
-    message: string;
-}
-
-interface ScreenShareData {
-    userId: string;
-    room: string;
-    screenData: string;
-}
-
+import {
+    WebSocketGateway,
+    SubscribeMessage,
+    MessageBody,
+    WebSocketServer,
+    ConnectedSocket,
+    OnGatewayInit,
+    OnGatewayDisconnect,
+    OnGatewayConnection,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+import { ChatService } from './chat.service';
+import { JwtService } from '@nestjs/jwt';
 
 @WebSocketGateway({
     cors: {
@@ -25,74 +19,105 @@ interface ScreenShareData {
     namespace: '/chat',
 })
 
-@WebSocketGateway()
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    @WebSocketServer() server: Server;
+    @WebSocketServer()
+    server: Server;
 
-    private logger: Logger = new Logger('ChatGateway');
 
     constructor(
-        private readonly jwtService: JwtService,
-        private readonly userService: UserService
+        private readonly chatService: ChatService,
+        private readonly jwtService: JwtService
     ) { }
 
-
-    private clients: Map<string, Socket> = new Map();
-
     afterInit(server: Server) {
-        console.log('WebSocket server initialized');
+        console.log('Chat gateway initialized');
     }
 
-    handleConnection(socket: Socket, ...args: any[]) {
+    // Log when a new client connects
 
-        const token = socket.handshake.auth.token
+    handleConnection(client: Socket) {
+        // console.log(`Client connected: ${client.id}`);
+    }
+
+    handleDisconnect(client: Socket) {
+        // console.log(`Client Disconnected: ${client.id}`);
+    }
+
+    @SubscribeMessage('joinChat')
+    async handleJoinChat(
+        @MessageBody('applicationId') applicationId: string,
+        @MessageBody('chatId') chatId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
 
         try {
-            const decodedToken = this.jwtService.verify(token);
-            const userId = decodedToken.id;
+            console.log(`User ${user.id} is trying to join chat with applicationId: ${applicationId}`);
 
-            socket.data.userId = userId;
-            this.logger.log(`Client connected: User Id - ${userId}`);
+            const room = await this.chatService.getRoomByChatId(chatId);
+
+
+            // Join the shared room
+            client.join(room.id);
+            console.log(`User ${user.id} joined room ${room.id}`);
+
+            // return { success: true, chatId: chat.id, roomId };
         } catch (error) {
-            this.logger.error(`Invalid token: ${error}`);
-            socket.disconnect();
+            console.error('Error in handleJoinChat:', error);
+            return { success: false, message: error.message };
         }
     }
-    handleDisconnect(socket: Socket) {
-        this.logger.log(`Client disconnected: User ID - ${socket.data.userId}`);
-    }
 
-    @SubscribeMessage('joinRoom')
-    handleJoinRoom(@MessageBody() room: string, @ConnectedSocket() socket: Socket) {
-        socket.join(room);
-        this.logger.log(`User ID ${socket.data.userId} joined room ${room}`);
-        socket.to(room).emit('userJoined', {
-            userId: socket.data.userId
-        })
-    }
-
-    @SubscribeMessage('leaveRoom')
-    handleLeaveRoom(@MessageBody() room: string, @ConnectedSocket() socket: Socket) {
-        socket.leave(room);
-        this.logger.log(`User ID ${socket.data.userId} left room ${room}`);
-        socket.to(room).emit('userLeft', {
-            userId: socket.data.userId
-        })
-    }
 
     @SubscribeMessage('sendMessage')
-    handleMessage(@MessageBody() data: ChatMessage, @ConnectedSocket() socket: Socket) {
-        this.logger.log(`Message from User ID ${data.userId} in room ${data.room}: ${data.message}`)
-        this.server.to(data.room).emit('receiveMessage', data)
+    async handleMessage(
+        @MessageBody('chatId') chatId: string,
+        @MessageBody('content') content: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+        try {
+            const room = await this.chatService.getRoomByChatId(chatId);
+            const message = await this.chatService.saveMessage(chatId, user.id, content);
+            client.to(room.id).emit('newMessage', message);
+
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     }
 
-    @SubscribeMessage('signal')
-    handleSignal(@MessageBody() data: any, @ConnectedSocket() socket: Socket) {
-        console.log("I am signal")
-        this.logger.log(`Signal from User ID ${data.userId} in room ${data.room}`)
-        const { room, signalData } = data;
-        socket.to(room).emit('signal', signalData);
+    @SubscribeMessage('startScreenShare')
+    async handleStartScreenShare(
+        @MessageBody('chatId') chatId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+        client.to(chatId).emit('screenShareStarted', { userId: user.id, username: user.username });
     }
 
+    @SubscribeMessage('stopScreenShare')
+    async handleStopScreenShare(
+        @MessageBody('chatId') chatId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+        client.to(chatId).emit('screenShareStopped', { userId: user.id, username: user.username });
+    }
+
+    @SubscribeMessage('shareScreenData')
+    async handleShareScreenData(
+        @MessageBody('chatId') chatId: string,
+        @MessageBody('screenData') screenData: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+        const room = await this.chatService.getRoomByChatId(chatId);
+        client.to(room.id).emit('receiveScreenData', screenData);
+
+    }
 }
-

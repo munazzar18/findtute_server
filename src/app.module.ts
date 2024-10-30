@@ -14,11 +14,11 @@ import { join } from 'path';
 import { SubjectsModule } from './subjects/subjects.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { dataSourceOptions } from 'data-source';
-import { ChatModule } from './chat/chat.module';
 import { ApplicationModule } from './application/application.module';
 import { CountryStateCityModule } from './country-state-city/country-state-city.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PaymentModule } from './payment/payment.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -60,11 +60,11 @@ import { PaymentModule } from './payment/payment.module';
     EncryptionModule,
     GradeModule,
     SubjectsModule,
-    ChatModule,
     ApplicationModule,
     CountryStateCityModule,
     DashboardModule,
-    PaymentModule
+    PaymentModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [],

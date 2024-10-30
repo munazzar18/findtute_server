@@ -35,7 +35,8 @@ export class AuthController {
     async verifyOtp(@Body() data: VerifyOTPDto) {
         const verify = await this.authService.verifyOtp(data.email, data.otp)
         return sendJson(true, "Otp Verified", {
-            access_token: verify
+            access_token: verify.access_token,
+            user: verify.user
         })
     }
 

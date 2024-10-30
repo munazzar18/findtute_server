@@ -1,12 +1,51 @@
 import { EncryptionService } from 'src/encryption/encryption.service';
 import { Injectable } from '@nestjs/common';
 import { HandshakeDto, InititateCheckoutDto } from './initiateHandshakeDto.dto';
-import { Channel } from 'diagnostics_channel';
+import { UserService } from 'src/user/user.service';
+import { encodedToken } from 'src/auth/bcrypt';
+import { ApplicationService } from 'src/application/application.service';
+import { UserEntity } from 'src/user/user.entity';
 @Injectable()
 export class PaymentService {
     constructor(
-        private readonly encryptService: EncryptionService
+        private readonly encryptService: EncryptionService,
+        private readonly userService: UserService,
+        private readonly applicationService: ApplicationService
     ) { }
+
+    async createPayment(data: UserEntity) {
+
+        const user = await this.userService.findOneById(data.id)
+
+        if (!user) {
+            throw new Error('user not found')
+        }
+
+        const token = user.first_name + user.last_name + user.email + user.id
+
+        const paymentHash = encodedToken(token)
+
+        const updateUser = await this.userService.updateUser(user.id, { is_authorized: paymentHash })
+
+        if (!updateUser) {
+            throw new Error('something went wrong updating is_authorized')
+        }
+
+        const grades = await this.userService.getGradesForUser(user.id)
+
+        const subjects = await this.userService.getSubjectsForUser(user.id)
+
+        const application = await this.applicationService.create({
+            ...user,
+            grades,
+            subjects
+        })
+
+        return {
+            updateUser,
+            application
+        }
+    }
 
 
 

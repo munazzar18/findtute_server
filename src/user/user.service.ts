@@ -33,11 +33,58 @@ export class UserService {
     }
 
     async findOneByEmail(email: string) {
-        return await this.userRepo.findOneBy({ email })
+        try {
+            return await this.userRepo.findOneBy({ email })
+
+        } catch (error) {
+            throw new Error(error)
+        }
     }
 
     async updateUser(id: string, updateData: Partial<UserEntity>) {
         return await this.userRepo.update(id, updateData)
+    }
+
+    async getGradesForUser(userId: string) {
+        try {
+            const grades = await this.gradeRepo.find({
+                where: {
+                    users: {
+                        id: userId
+                    }
+                }
+            })
+
+            if (!grades) {
+                throw new Error('Grades not found')
+            }
+
+            return grades
+
+        } catch (error) {
+            throw new Error(`Failed to get grades for user: ${error}`);
+        }
+    }
+
+    async getSubjectsForUser(userId: string) {
+        try {
+            const subjects = await this.subjectRepo.find({
+                where: {
+                    users: {
+                        id: userId
+                    }
+                }
+            })
+
+            if (!subjects) {
+                throw new Error('Subjects not found')
+            }
+
+            return subjects
+
+        } catch (error) {
+            throw new Error(`Failed to get subjects for user: ${error}`);
+        }
     }
 
     async updateUserProfile(id: string, updateData: UpdateUserProfileDto, authUser: UserEntity) {
