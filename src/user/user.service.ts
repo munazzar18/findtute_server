@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './user.entity';
-import { Repository, In } from 'typeorm';
+import { Repository, In, Not } from 'typeorm';
 import { RegisterUserDto } from './registerUser.dto';
 import { MailerService } from '@nestjs-modules/mailer';
 // import { Twilio } from 'twilio';
@@ -26,6 +26,20 @@ export class UserService {
 
     async findAll() {
         return await this.userRepo.find()
+    }
+
+    async findMatching(userId: string) {
+        const userData = await this.findOneById(userId)
+
+        const data = await this.userRepo.find({
+            where: {
+                id: Not(userId),
+                preference: userData.preference,
+
+            }
+        })
+
+        return data
     }
 
     async findOneById(id: string) {

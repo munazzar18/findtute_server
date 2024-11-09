@@ -1,42 +1,46 @@
-import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body } from '@nestjs/common';
 import { PaymentService } from './payment.service';
-import { HandshakeDto, initiateHandshakeDTO, InititateCheckoutDto } from './initiateHandshakeDto.dto';
-import { AuthGuard } from 'src/auth/auth.guard';
-import { Roles } from 'src/roles/role.decorator';
-import { Role } from 'src/roles/role.enum';
 
 @Controller('payment')
 export class PaymentController {
+    constructor(private readonly paymentService: PaymentService) { }
 
-    constructor(
-
-        private readonly paymentService: PaymentService
-    ) { }
-
-    @Post('handshake')
-    async handshake(@Body() data: HandshakeDto) {
-        return await this.paymentService.handShake(data.orderId)
+    @Post('create-order')
+    createOrder(@Body() createOrderDto: any) {
+        return this.paymentService.createOrder(
+            createOrderDto.amount,
+            createOrderDto.description,
+            createOrderDto.urls,
+        );
     }
 
-    @Post('initiateHandshake')
-    async initiateHandshake(@Body() data: HandshakeDto) {
-        return await this.paymentService.initiateHandshake(data)
+    @Post('get-order-info')
+    getOrderInformation(@Body() body: { sessionId: string }) {
+        return this.paymentService.getOrderInformation(body.sessionId);
     }
 
-
-    @Post('checkout')
-    async initiateCheckout(@Body() data: InititateCheckoutDto) {
-
-        return await this.paymentService.initiateCheckout(data)
+    @Post('pre-auth')
+    preAuth(@Body() body: any) {
+        return this.paymentService.preAuth(body.amount, body.description, body.approveURL);
     }
 
-    @UseGuards(AuthGuard)
-    @Roles(Role.Teacher)
-    @Post('create-payment')
-    async createPayment(@Request() req) {
-        const data = req.user
-        return await this.paymentService.createPayment(data)
+    @Post('complete-order')
+    completeOrder(@Body() body: any) {
+        return this.paymentService.completeOrder(body.amount, body.description, body.orderId);
     }
 
+    @Post('create-invoice')
+    createInvoice(@Body() invoiceDetails: any) {
+        return this.paymentService.createInvoice(invoiceDetails);
+    }
 
+    @Post('get-invoice')
+    getInvoice(@Body() body: { uuid: string }) {
+        return this.paymentService.getInvoice(body.uuid);
+    }
+
+    @Post('update-invoice')
+    updateInvoice(@Body() body: any) {
+        return this.paymentService.updateInvoice(body.invoiceId, body.invoiceUpdateDetails);
+    }
 }

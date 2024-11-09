@@ -196,6 +196,16 @@ export class ChatService {
         }
     }
 
+    async getAllActiveRooms() {
+        try {
+            const rooms = await this.roomRepository.find()
+
+            return rooms
+        } catch (error) {
+            throw new Error(`Failed to get user rooms: ${error}`);
+        }
+    }
+
 }
 
 

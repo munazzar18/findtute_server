@@ -1,4 +1,4 @@
-import { Body, ClassSerializerInterceptor, Controller, Post, Request, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, Param, Post, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApplicationService } from './application.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/roles/role.decorator';
@@ -22,6 +22,17 @@ export class ApplicationController {
         const user = req.user
         const result = await this.appliationService.studentApplyOnApplication(user, data)
         return sendJson(true, 'Application submitted successfully', result)
+    }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @UseGuards(AuthGuard)
+    @Roles(Role.Teacher)
+    @Get('/user-applications')
+    async userApplications(@Request() req) {
+        const user = req.user
+        const userId = user.id
+        const result = await this.appliationService.findOneByUserId(userId)
+        return sendJson(true, 'User applications fetched successfully', result)
     }
 
 }

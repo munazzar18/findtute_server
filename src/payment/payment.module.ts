@@ -6,6 +6,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
 import { ApplicationModule } from 'src/application/application.module';
 import { UserModule } from 'src/user/user.module';
+import { HttpModule, HttpService } from '@nestjs/axios';
+import { PRIVATE_KEY, EASYPAISA_PUBLIC_KEY } from './payment.constants';
 
 
 @Module({
@@ -14,9 +16,17 @@ import { UserModule } from 'src/user/user.module';
       secret: JwtConstants.secret
     }),
     ApplicationModule,
-    UserModule
+    UserModule,
+    HttpModule
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, EncryptionService]
+  providers: [PaymentService, EncryptionService, {
+    provide: 'PRIVATE_KEY',
+    useValue: PRIVATE_KEY,
+  },
+    {
+      provide: 'EASYPAISA_PUBLIC_KEY',
+      useValue: EASYPAISA_PUBLIC_KEY,
+    },]
 })
 export class PaymentModule { }

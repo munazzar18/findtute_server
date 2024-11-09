@@ -6,7 +6,7 @@
 # Ignore all .ts files inside the migrations folder
 /src/migrations/*.ts
 
-
+/keys
 
 
 # Logs

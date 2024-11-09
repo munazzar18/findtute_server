@@ -43,11 +43,7 @@ import { ChatModule } from './chat/chat.module';
       // },
     }),
     MulterModule.register({
-      dest: './public/uploads/',
-    }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'),
-      serveRoot: '/public/',
+      dest: './images/',
     }),
     JwtModule.registerAsync({
       useFactory: async (configService: ConfigService) => ({

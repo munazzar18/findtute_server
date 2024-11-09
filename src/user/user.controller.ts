@@ -1,15 +1,15 @@
-import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Request, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, ClassSerializerInterceptor, Controller, Get, HttpException, HttpStatus, NotFoundException, Param, Post, Put, Query, Request, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { sendJson } from '../helpers/helpers';
 import { serializedUser } from './user.entity';
 import { UserService } from './user.service';
-import { RegisterUserDto } from './registerUser.dto';
-
 import { UpdateUserProfileDto } from './updateUserProfile.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { UploadFileDto } from './uploadFile.dto';
+import { FileUrlInterceptor } from './fileUrlInterceptor';
+
 
 
 @Controller('user')
@@ -22,6 +22,23 @@ export class UserController {
     @Get()
     async getUsers() {
         const users = await this.userService.findAll()
+        if (users.length > 0) {
+            const allUsers = users.map((user => new serializedUser(user)))
+            return sendJson(true, 'fetched all users successfully', allUsers)
+        }
+        else {
+            throw new HttpException('No users found', HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @UseGuards(AuthGuard)
+    @UseInterceptors(FileUrlInterceptor)
+    @Get('/match')
+    async getMatchingUsers(@Request() req) {
+        const user = req.user
+        const userId = user.id
+        const users = await this.userService.findMatching(userId)
         if (users.length > 0) {
             const allUsers = users.map((user => new serializedUser(user)))
             return sendJson(true, 'fetched all users successfully', allUsers)
@@ -94,7 +111,7 @@ export class UserController {
     @Post('upload')
     @UseInterceptors(FileInterceptor('file', {
         storage: diskStorage({
-            destination: './public/uploads/',
+            destination: './images',
             filename: (req, file, callback) => {
                 const orginalName = file.originalname;
                 const extention = extname(orginalName)
@@ -107,8 +124,23 @@ export class UserController {
 
     uploadImage(@Body() data: UploadFileDto, @UploadedFile() file: Express.Multer.File, @Request() req) {
 
-        const fileUrl = '/public/uploads/' + file.filename;
+        const fileUrl = '/images/' + file.filename;
         return sendJson(true, 'Images uploaded successfully', fileUrl)
+    }
+
+    // Update to handle paths based on the environment
+    @Get('uploads/:filename')
+    getImage(@Param('filename') filename: string, @Res() res) {
+        // Absolute path for images folder (relative to the project root, not dist folder)
+        const imagePath = join(process.cwd(), 'images', filename);
+
+        // Send the file
+        return res.sendFile(imagePath, (err) => {
+            if (err) {
+                console.error('File not found:', imagePath);
+                return res.status(404).json({ message: 'File not found', error: err });
+            }
+        });
     }
 
 }

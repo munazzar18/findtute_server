@@ -11,6 +11,7 @@ import { UserEntity } from 'src/user/user.entity';
 import { ChatGateway } from './chat.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
+import { UserModule } from 'src/user/user.module';
 
 
 @Module({
@@ -19,6 +20,7 @@ import { JwtConstants } from 'src/constants/jwtConstants';
       secret: JwtConstants.secret
     }),
     TypeOrmModule.forFeature([ChatEntity, MessageEntity, RoomEntity, ApplicationEntity, UserEntity]),
+    UserModule
   ],
   controllers: [ChatController],
   providers: [ChatService, ChatGateway],
