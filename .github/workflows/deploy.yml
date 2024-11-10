@@ -9,6 +9,21 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -21,11 +36,20 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Set environment variables
+        run: echo "Setting environment variables"
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+
       - name: Generate migrations
         run: npm run migration:generate
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
 
       - name: Run migrations
         run: npm run migration:run
+        env:
+          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
 
       - name: Run build
         run: npm run build
