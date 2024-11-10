@@ -1,0 +1,67 @@
+name: Deploy NestJS to Ubuntu VM
+
+on:
+  push:
+    branches:
+      - master # Adjust this to your deployment branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20' # Set Node.js version to 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Generate migrations
+        run: npm run migration:generate
+
+      - name: Run migrations
+        run: npm run migration:run
+
+      - name: Run build
+        run: npm run build
+
+      - name: Deploy to Ubuntu VM
+        env:
+          VM_HOST: ${{ secrets.VM_HOST }}
+          VM_USER: ${{ secrets.VM_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key
+          chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key $VM_USER@$VM_HOST << 'EOF'
+            # Navigate to the project directory
+            cd findtute_server # Adjust this path to where your project is on the VM
+            
+            # Stop the existing application if running
+            pm2 stop 0 || true
+            
+            # Pull the latest changes
+            git pull origin master
+            
+            # Install dependencies
+            npm install
+            
+            # Generate and run migrations
+            npm run migration:generate
+            npm run migration:run
+            
+            # Build the project
+            npm run build
+            
+            # Start the application with pm2
+            pm2 start 0
+          EOF
+        shell: bash
+
+      - name: Clean up
+        run: rm -f private_key
