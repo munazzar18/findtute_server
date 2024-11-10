@@ -10,8 +10,8 @@ ConfigModule.forRoot({
 export const dataSourceOptions: DataSourceOptions = {
     type: 'postgres',
     url: process.env.DB_URL || undefined,
-    host: process.env.DB_HOST,
-    port: parseInt(process.env.DB_PORT, 10),
+    host: process.env.DB_HOST || 'localhost',  // Use `localhost` as a fallback
+    port: parseInt(process.env.DB_PORT, 10) || 5432,
     username: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_DATABASE,

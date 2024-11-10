@@ -37,19 +37,36 @@ jobs:
         run: npm install
 
       - name: Set environment variables
-        run: echo "Setting environment variables"
+        run: |
+          echo "DB_HOST=localhost" >> $GITHUB_ENV
+          echo "DB_PORT=5432" >> $GITHUB_ENV
+          echo "DB_USERNAME=test_user" >> $GITHUB_ENV
+          echo "DB_PASSWORD=test_password" >> $GITHUB_ENV
+          echo "DB_DATABASE=test_db" >> $GITHUB_ENV
         env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: test_db
 
       - name: Generate migrations
         run: npm run migration:generate
         env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: test_db
 
       - name: Run migrations
         run: npm run migration:run
         env:
-          DATABASE_URL: postgres://test_user:test_password@localhost:5432/test_db
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: test_user
+          DB_PASSWORD: test_password
+          DB_DATABASE: test_db
 
       - name: Run build
         run: npm run build
