@@ -9,6 +9,9 @@ import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { UploadFileDto } from './uploadFile.dto';
 import { FileUrlInterceptor } from './fileUrlInterceptor';
+import { Role } from 'src/roles/role.enum';
+import { RolesGuard } from 'src/roles/role.guard';
+import { Roles } from 'src/roles/role.decorator';
 
 
 
@@ -18,7 +21,9 @@ export class UserController {
     constructor(private readonly userService: UserService) { }
 
 
-    @UseInterceptors(ClassSerializerInterceptor)
+    @UseInterceptors(ClassSerializerInterceptor, FileUrlInterceptor)
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.Admin)
     @Get()
     async getUsers() {
         const users = await this.userService.findAll()
