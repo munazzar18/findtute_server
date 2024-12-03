@@ -12,6 +12,7 @@ import { ChatGateway } from './chat.gateway';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtConstants } from 'src/constants/jwtConstants';
 import { UserModule } from 'src/user/user.module';
+import { NotificationService } from './notification.service';
 
 
 @Module({
@@ -23,7 +24,7 @@ import { UserModule } from 'src/user/user.module';
     UserModule
   ],
   controllers: [ChatController],
-  providers: [ChatService, ChatGateway],
+  providers: [ChatService, ChatGateway, NotificationService],
   exports: [ChatService]
 })
 export class ChatModule { }

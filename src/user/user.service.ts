@@ -43,7 +43,13 @@ export class UserService {
     }
 
     async findOneById(id: string) {
-        return await this.userRepo.findOneBy({ id })
+        const users = await this.userRepo.findOne({
+            where: {
+                id: id
+            },
+            relations: ['grades', 'subjects']
+        })
+        return users
     }
 
     async findOneByEmail(email: string) {
@@ -126,8 +132,6 @@ export class UserService {
                 updateData.subjects_ids : JSON.parse(updateData.subjects_ids);
             const gradesIdsArray = Array.isArray(updateData.grades_ids) ?
                 updateData.grades_ids : JSON.parse(updateData.grades_ids);
-
-
 
 
             updateData.subjects_ids = subjectsIdsArray.map(id => id.toString());

@@ -17,9 +17,11 @@ export class AuthGuard implements CanActivate {
                 request.user = decoded; // Attach the decoded token to the request object
                 return true;
             } catch (error) {
+                return false;
                 throw new WsException('Invalid token');
             }
         } else {
+            return false;
             throw new WsException('No token provided');
         }
     }

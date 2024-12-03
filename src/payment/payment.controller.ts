@@ -7,6 +7,7 @@ export class PaymentController {
 
     @Post('create-order')
     createOrder(@Body() createOrderDto: any) {
+        console.log(createOrderDto)
         return this.paymentService.createOrder(
             createOrderDto.amount,
             createOrderDto.description,

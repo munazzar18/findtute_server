@@ -12,6 +12,7 @@ import { Server, Socket } from 'socket.io';
 import { ChatService } from './chat.service';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/user/user.service';
+import { NotificationService } from './notification.service';
 
 @WebSocketGateway({
     cors: {
@@ -28,11 +29,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     constructor(
         private readonly chatService: ChatService,
         private readonly jwtService: JwtService,
-        private readonly userService: UserService
+        private readonly userService: UserService,
+        private readonly notificationService: NotificationService
     ) { }
 
     afterInit(server: Server) {
         console.log('Chat gateway initialized');
+        this.notificationService.setServer(server)
     }
 
     // Log when a new client connects
@@ -73,6 +76,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
             // Join the shared room
             client.join(room.id);
+            this.notificationService.sendToRoom(room.id, 'notification', { from: user.username, chatId, content: 'has joined the chat', userId: user.id })
             // console.log(`User ${user.id} joined room ${room.id}`);
 
             // return { success: true, chatId: chat.id, roomId };
@@ -108,7 +112,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             client.emit('messageStatus', { messageId: message.id, status: messageStatus })
 
             const recipientSocket = this.server.sockets.sockets.get(room.other_user.id)
-            console.log(recipientSocket)
+
 
 
         } catch (error) {
@@ -176,9 +180,6 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             client.emit('error', 'Authentication failed');
         }
     }
-
-
-
 
     // Activity event
     @SubscribeMessage('activity')

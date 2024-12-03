@@ -22,7 +22,6 @@ export class PaymentService {
 
     private async makeRequest(method: string, endpoint: string, data: any) {
         try {
-            console.log(data)
             const url = `${this.baseUrl}/${endpoint}`;
             const response = await this.httpService[method](url, data, {
                 headers: this.headers,
@@ -43,10 +42,10 @@ export class PaymentService {
                 currencyType: 'PKR',
                 description,
                 language: 'EN',
-                approveURL: urls.approveURL,
-                cancelURL: urls.cancelURL,
-                declineURL: urls.declineURL,
-                uuid: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
+                approveURL: "",
+                cancelURL: "",
+                declineURL: "",
+                // uuid: Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15),
                 cardStorage: true,
             },
         };
