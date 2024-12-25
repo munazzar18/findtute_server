@@ -11,8 +11,33 @@ export class SubjectsService {
     ) { }
 
 
-    async findAll() {
-        return await this.subjectRepo.find()
+    async findAll(page: number) {
+        const limit: number = 10;
+        const skip: number = (page - 1) * limit
+        try {
+            const [subjects, total] = await this.subjectRepo.findAndCount({
+                order: {
+                    id: 'ASC'
+                },
+                skip: skip,
+                take: (page * limit)
+            })
+            const totalPages = Math.ceil(total / limit)
+
+            return {
+                data: subjects,
+                pageData: {
+                    total,
+                    perPage: limit,
+                    currentPage: Number(page),
+                    lastPage: totalPages
+                }
+            }
+
+        } catch (error) {
+            console.log(error)
+            return error
+        }
     }
 
 

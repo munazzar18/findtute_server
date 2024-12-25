@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { sendJson } from 'src/helpers/helpers';
 
@@ -17,10 +17,12 @@ export class SubjectsController {
     ) { }
 
     @Get()
-    async findAll() {
+    async findAll(
+        @Query('page') page: number
+    ) {
         try {
-            const allSubjects = await this.subjectService.findAll()
-            return sendJson(true, 'All subjects', allSubjects)
+            const allSubjects = await this.subjectService.findAll(page)
+            return allSubjects
         } catch (error) {
             return sendJson(false, 'Failed to get all subjects', error)
         }
@@ -59,7 +61,6 @@ export class SubjectsController {
             return sendJson(false, 'Failed to create subject', error)
         }
     }
-
 
     @UseGuards(AuthGuard, RolesGuard)
     @Roles(Role.Admin)
