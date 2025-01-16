@@ -1,5 +1,15 @@
 
 import * as crypto from 'crypto';
+import * as CryptoJS from 'crypto-js';
+
+import { ConfigModule } from '@nestjs/config';
+
+ConfigModule.forRoot({
+    envFilePath: ['.env', '.env.development', 'env.production']
+})
+
+const clientSecretKey = process.env.SECRET_KEY
+
 
 
 export const sendJson = (status: boolean, message: string, data?: any) => {
@@ -49,6 +59,44 @@ export function generateHash(fields: Record<string, string>, secretKey: string):
     encrypted += cipher.final('base64');
 
     return encrypted;
+}
+
+export function switchHash(customerTransacionId: string, item: string, amount: number) {
+
+    const stringToHash = `Swich:${customerTransacionId}:${item}:${amount}`
+    const hmac = crypto.createHmac('sha256', clientSecretKey)
+    hmac.update(stringToHash)
+    const checkSum = hmac.digest('hex')
+    return checkSum
+}
+
+export function generateEncryptedHash(payload: object, secretKey: string): string {
+    try {
+        // Convert the payload to a JSON string
+        const jsonString = JSON.stringify(payload);
+
+        // Ensure the secretKey is valid
+        // if (secretKey.length !== 32) {
+        //     throw new Error('Secret key must be 32 characters long.');
+        // }
+
+        // Create the encryption key and IV
+        const key = CryptoJS.enc.Utf8.parse(secretKey);
+        const iv = CryptoJS.enc.Utf8.parse(secretKey.slice(0, 16)); // First 16 bytes as IV
+
+        // Encrypt the payload
+        const encrypted = CryptoJS.AES.encrypt(jsonString, key, {
+            iv,
+            mode: CryptoJS.mode.CBC,
+            padding: CryptoJS.pad.Pkcs7,
+        });
+
+        // Return the encrypted string
+        return encrypted.toString();
+    } catch (error) {
+        console.error('Error generating encrypted hash:', error.message);
+        throw error;
+    }
 }
 
 

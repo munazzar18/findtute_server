@@ -1,47 +1,48 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, UseGuards, Request } from '@nestjs/common';
 import { PaymentService } from './payment.service';
+import { sendJson } from 'src/helpers/helpers';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { RolesGuard } from 'src/roles/role.guard';
+import { Roles } from 'src/roles/role.decorator';
+import { Role } from 'src/roles/role.enum';
+import { PaymentDto } from './payment.dto';
 
 @Controller('payment')
 export class PaymentController {
     constructor(private readonly paymentService: PaymentService) { }
 
-    @Post('create-order')
-    createOrder(@Body() createOrderDto: any) {
-        console.log(createOrderDto)
-        return this.paymentService.createOrder(
-            createOrderDto.amount,
-            createOrderDto.description,
-            createOrderDto.urls,
-        );
+    @Post('authenticate')
+    async authenticate() {
+        try {
+            const authToken = await this.paymentService.authenticate()
+            return authToken
+        } catch (error) {
+            throw new Error('Failed to authenticate' + error)
+        }
     }
 
-    @Post('get-order-info')
-    getOrderInformation(@Body() body: { sessionId: string }) {
-        return this.paymentService.getOrderInformation(body.sessionId);
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.Teacher)
+    @Post('create-transaction')
+    async getLandingUrl(@Body() data: PaymentDto, @Request() req) {
+        try {
+            const user = req.user
+            const url = await this.paymentService.getLandingPage(data, user)
+            return sendJson(true, "url is recieved successfully", url)
+        } catch (error) {
+            throw new Error('Failed to get url:' + error)
+        }
     }
 
-    @Post('pre-auth')
-    preAuth(@Body() body: any) {
-        return this.paymentService.preAuth(body.amount, body.description, body.approveURL);
+    @Post('transaction')
+    async createTransaction() {
+        try {
+            const transaction = await this.paymentService.createTransaction()
+            return transaction
+        } catch (error) {
+            throw new Error('Failed to create Transaction due to:' + error)
+        }
     }
 
-    @Post('complete-order')
-    completeOrder(@Body() body: any) {
-        return this.paymentService.completeOrder(body.amount, body.description, body.orderId);
-    }
 
-    @Post('create-invoice')
-    createInvoice(@Body() invoiceDetails: any) {
-        return this.paymentService.createInvoice(invoiceDetails);
-    }
-
-    @Post('get-invoice')
-    getInvoice(@Body() body: { uuid: string }) {
-        return this.paymentService.getInvoice(body.uuid);
-    }
-
-    @Post('update-invoice')
-    updateInvoice(@Body() body: any) {
-        return this.paymentService.updateInvoice(body.invoiceId, body.invoiceUpdateDetails);
-    }
 }

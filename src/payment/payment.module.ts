@@ -19,6 +19,9 @@ import { HttpModule, HttpService } from '@nestjs/axios';
     HttpModule
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, EncryptionService]
+  providers: [PaymentService, EncryptionService, {
+    provide: 'SWITCH_URL',
+    useValue: process.env.SWITCH_URL
+  }]
 })
 export class PaymentModule { }

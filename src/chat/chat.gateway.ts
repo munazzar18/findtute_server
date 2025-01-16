@@ -40,8 +40,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     // Log when a new client connects
 
-    handleConnection(client: Socket) {
+    async handleConnection(client: Socket) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
         // console.log(`Client connected: ${client.id}`);
+
+        client.on('socketId', async (socketId) => {
+            await this.userService.updateUser(user.id, { socketId: socketId })
+            // console.log(socketId)
+        })
     }
 
     async handleDisconnect(client: Socket) {
@@ -98,9 +105,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         try {
             const room = await this.chatService.getRoomByChatId(chatId);
             const message = await this.chatService.saveMessage(chatId, user.id, content);
-            this.server.to(room.id).emit('newMessage', message);
+            this.server.to(room.id).emit('newMessage', message)
 
-            this.server.to(room.id).emit('notification', {
+            this.server.to(room.other_user.socketId).emit('notification', {
                 from: user.username,
                 chatId,
                 content,
@@ -112,6 +119,15 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             client.emit('messageStatus', { messageId: message.id, status: messageStatus })
 
             const recipientSocket = this.server.sockets.sockets.get(room.other_user.id)
+
+            if (recipientSocket) {
+                recipientSocket.emit('notification', {
+                    from: user.username,
+                    chatId,
+                    content,
+                    userId: user.id
+                });
+            }
 
 
 

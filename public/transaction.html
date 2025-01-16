@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/lib/bootstrap/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <link href="/lib/bootstrap/dist/css/bootstrap.rtl.css" rel="stylesheet" />
+    <link href="/lib/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/Content/css/normalize.css">
+    <link rel="stylesheet" href="/Content/css/responsive.css">
+    <link rel="stylesheet" href="/Content/css/owlcarousel/owl.carousel.min.css">
+    <link rel="stylesheet" href="/Content/css/owlcarousel/owl.theme.default.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Nastaliq+Urdu&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/Content/css/style.css">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-6MY6BMWG46"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-6MY6BMWG46');
+    </script>
+
+    <title>Not Found</title>
+
+    <style>
+
+
+        .urdu {
+            font-family: 'Noto Nastaliq Urdu', serif !important;
+        }
+    </style>
+
+</head>
+<body class="loaded">
+
+    
+<section class="payment-sec-1 global-bg pb-4 vh-100 SorryBG">
+
+    <header>
+        <nav class="navbar">
+            <div class="container-xl ContainerFix"></div>
+        </nav>
+    </header><!-- End Header -->
+
+    <div class="container card-parent ContainerFix ">
+
+        <div class="row vh-75 d-flex align-items-center">
+            <div class="col-sm-12 p-0">
+                <div class="errorDiv">
+                    <div class="card mb-3 border-0">
+                        <div class="card-body pt-4 pb-4 p-4">
+                            <div class="row d-flex align-items-center">
+                                <div class="col-7"></div>
+                                <div class="col-5">
+                                    <img src="/Content/img/icon/404.png" class="img-fluid" />
+                                </div>
+                            </div>
+                            <div class="row mt--30 mb-2">
+                                <div class="col-12">
+                                    <h3 class="errorStatus">Sorry</h3>
+                                    <span class="infoError">
+                                        Information
+                                        <span class="infoErrorinner">
+                                            Not Found
+                                        </span>
+                                    </span>
+
+                                    
+
+<div class="contactDetail">
+    <p>
+        For details, contact our expert at
+            <span class="float-end urdu">تفصیلات کے لیے، ہمارے ماہرین سے رابطہ کریں</span>
+    </p>
+    <br />
+        <i class="bi bi-telephone"></i>
+        <span>
+            <a href="tel:&#x2B;92 319 1234567">&#x2B;92 319 1234567</a>
+        </span>
+        <br />
+    <i class="bi bi-envelope"></i>
+    <span>
+        <a href="mailto:support@swichnow.com">support@swichnow.com</a>
+    </span>
+</div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div> <!--End Row-->
+    </div><!--End Container-->
+
+</section><!-- End Section -->
+
+
+    <footer b-un9arxxrfs>
+        <script src="/Content/js/jquery.min.js"></script>
+        <script src="/Content/js/slidereveal.js"></script>
+        <script src="/Content/js/owlcarousel/owl.carousel.min.js"></script>
+        <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
+        <script src="/Content/js/clipboard.min.js"></script>
+        <script src="/Content/js/main.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+        <script src="/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+        <script src="/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="/js/signalr/dist/browser/signalr.min.js"></script>
+    </footer>
+
+    <script>
+
+        function CallAsyncService(url, Param, CallbackFunction) {
+            try {
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: Param,
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    async: true,
+                    timeout: (1000 * 60 * 4),
+                    success: function (data) {
+                        CallbackFunction(data);
+                    }
+                });
+            }
+            catch (Err) {
+            }
+        }
+
+        function phonenumber(inputtxt) {
+
+            const match = /^((92))((\3))[1-9](\d{3}){3}$/;
+            const match2 = /^((0))((\3))[1-9](\d{3}){3}$/;
+
+            return inputtxt.match(match) || inputtxt.match(match2);
+        }
+
+        function cnicNumber(cnicTxt) {
+            var cnicNumberText = cnicTxt.toString().trim();
+            const match1 = /^\d{13}/g;
+
+            return cnicNumberText.match(match1);
+        }
+
+        function email(emailTxt) {
+
+            emailTxt = emailTxt.toString().trim();
+
+            const match1 = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g
+            return emailTxt.match(match1);
+        }
+
+        function validateAccountNumber(bank, accountNumber) {
+
+            var result;
+            var res = {
+                result: false,
+                error: 'Invalid Account'
+            };
+
+            if (bank == "tbank") { // test bank from nift
+                res.result = true;
+                res.error = '';
+
+                return res;
+            }
+            else if (bank == "ablbank") {
+
+                var reg = new RegExp('^\\d{4}(001|002)\\d{13}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^PK\\d{2}ABPA\\d{16}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 20-digit account number or 24 Alphanumeric IBAN.\n' +
+                    'Kindly Call ABL H/L 021-111-225-225 to activate your local e-commerce service.\n' +
+                    'Please enter your 20-digit account number or 24 Alphanumeric IBAN.';
+
+                return res;
+            }
+            else if (bank == "hmbl") {
+
+                var reg = new RegExp('^6\\d{19,20}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^PK\\d{2}MPBL\\d{16}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 19 or 20 digit account number or 24 Alphanumeric IBAN.';
+                return res;
+            }
+            else if (bank == "bafl") {
+
+                var reg = new RegExp('^\\d{4}(1|5)\\d{9}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 14-digit account number.';
+                return res;
+            }
+            else if (bank == "bopbank") {
+
+                var reg = new RegExp('^(4|5|6|8)\\d{15}', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please ensure your account is activated to use this service.\n' +
+                    'Kindly Call BOP H/L 042-111-267-200 to activate your e-commerce service.\n' +
+                    'Please enter your 16-digit account number';
+                return res;
+            }
+            else if (bank == "mcbi") {
+
+                var reg = new RegExp('^\\d{16}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^PK\\d{2}MCIB\\d{16}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please ensure your account is activated to use this service. Kindly Call MIB H/L 042-111-222-642 to activate your e-commerce service.\n' +
+                    'MIB H/L 042-111-222-642 to activate your e-commerce service.\n' +
+                    'Please enter your 16 digit account number or 24 Alpha-numeric IBAN';
+                return res;
+            }
+            else if (bank == "samb") {
+
+                var reg = new RegExp('^(20|64|65)\\d{8}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 10-digit account number';
+                return res;
+            }
+            else if (bank == "akbl") {
+
+                var reg = new RegExp('^\\d{13}$|^[A-Z]{2}\\d{22}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^\\d{13}$|^[A-Z]{2}\\d{22}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter 13 digit Account number or 24 Alpha-numeric IBAN';
+                return res;
+            }
+            else if (bank == "bkip") {
+
+                var reg = new RegExp('^\\d{15}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 15-digit account number';
+                return res;
+            }
+            else if (bank == "habb") {
+
+                var reg = new RegExp('^\\d{14}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 14-digit account number';
+                return res;
+            }
+            else if (bank == "habbk") {
+                // need to ask for nift
+                var reg = new RegExp('^\\d{11}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 11-digit account number';
+                return res;
+            }
+            else if (bank == "mzbl") {
+
+                var reg = new RegExp('^\\d{14}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter your 14-digit account number';
+                return res;
+            }
+            else if (bank == "bahl") {
+
+                var reg = new RegExp('^\\d{17}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^PK\\d{2}BAHL\\d{10}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter 17 digit Account number or 24 Alpha-numeric IBAN';
+                return res;
+            }
+            else if (bank == "abpl") {
+
+                var reg = new RegExp('^\\d{13}$', 'g'); // Account number
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                reg = new RegExp('^PK\\d{2}AIIN\\d{10}$', 'g'); // IBAN
+                res.result = reg.test(accountNumber);
+                if (res.result) {
+                    return res;
+                }
+
+                res.error = 'Please enter 13 digit Account number or 24 Alpha-numeric IBAN';
+                return res;
+            }
+            else{
+                res.result = true;
+                res.error = '';
+            }
+
+
+            return res;
+        }
+
+        function runTimer($totalSecondsDom, $timerDom, timerExpireCallbackFunction) {
+            
+            if ($totalSecondsDom.length < 1) {
+                console.error("No total seconds dom defined");
+            }
+            else if ($timerDom.length > 0) {
+
+                var totalSeconds = parseInt($totalSecondsDom.val());
+
+                var hours = Math.floor(totalSeconds / 3600);
+                var minutes = Math.floor((totalSeconds % 3600) / 60);
+                var seconds = Math.floor(totalSeconds % 60);
+
+                $timerDom.html(`${hours}:${minutes}:${seconds}`);
+
+                totalSeconds--;
+                $totalSecondsDom.val(totalSeconds);
+
+                if (totalSeconds > 0) {
+                    setTimeout(function () {
+                        runTimer($totalSecondsDom, $timerDom, timerExpireCallbackFunction);
+                    }, 1000);
+                }
+                else {
+                    timerExpireCallbackFunction();
+                }
+            }
+            else{
+                console.error("No timer dom defined");
+            }
+        }
+
+        if ($("#MoveToExpired").length > 0) {
+            var urlUpdateTimer = '/Transaction/UpdateTimer';
+            setInterval(function () {
+                $('#Timer').css('opacity', '0.5');
+                CallAsyncService(urlUpdateTimer, null, Timer);
+                function Timer(res) {
+                    var min = res / 60;
+                    var sec = res % 60;
+                    min = parseInt(min).toLocaleString('en-US', {
+                        minimumIntegerDigits: 2,
+                        useGrouping: false
+                    });
+                    sec = parseInt(sec).toLocaleString('en-US', {
+                        minimumIntegerDigits: 2,
+                        useGrouping: false
+                    });
+
+                    if (parseInt(min) == 0 && parseInt(sec) == 0) {
+                        document.getElementById("MoveToExpired").click();
+                    }
+                }
+
+            }, 1000);
+        }
+    </script>
+
+    
+</body>
+</html>

@@ -100,6 +100,9 @@ export class UserEntity {
     @Column({ nullable: true })
     is_authorized: string;
 
+    @Column({ nullable: true })
+    socketId: string;
+
     @CreateDateColumn({ type: 'timestamptz' })
     created_at: Date;
 
@@ -159,6 +162,7 @@ export class serializedUser {
     subjects: SubjectsEntity[];
     chats: ChatEntity[];
     rooms: RoomEntity[];
+    socketId: string;
 
 
     @Exclude()
