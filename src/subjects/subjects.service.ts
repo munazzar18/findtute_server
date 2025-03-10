@@ -10,6 +10,10 @@ export class SubjectsService {
         @InjectRepository(SubjectsEntity) private subjectRepo: Repository<SubjectsEntity>
     ) { }
 
+    async getAllSubjects() {
+        return await this.subjectRepo.find()
+    }
+
 
     async findAll(page: number) {
         const limit: number = 10;

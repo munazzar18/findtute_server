@@ -206,6 +206,26 @@ export class ChatService {
         }
     }
 
+    async deleteMessage(messageId: string, userId: string) {
+        try {
+            const message = await this.messageRepository.findOne({
+                where: {
+                    id: messageId,
+                    sender: { id: userId }
+                }
+            })
+
+            if (!message) {
+                throw new NotFoundException('Message not found');
+            }
+
+            await this.messageRepository.remove(message)
+            return message
+        } catch (error) {
+            throw new Error(`Failed to delete message: ${error}`);
+        }
+    }
+
 }
 
 

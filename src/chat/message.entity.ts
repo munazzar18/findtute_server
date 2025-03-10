@@ -2,6 +2,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ChatEntity } from './chat.entity';
 import { UserEntity } from 'src/user/user.entity';
+import { MessageStatus } from './messageStatus.enum';
 
 
 @Entity('messages')
@@ -11,6 +12,9 @@ export class MessageEntity {
 
     @Column()
     content: string;
+
+    @Column({ type: "enum", enum: [MessageStatus.Delivered, MessageStatus.Sent, MessageStatus.Seen], default: MessageStatus.Sent })
+    status: MessageStatus
 
     @ManyToOne(() => ChatEntity, (chat) => chat.messages)
     chat: ChatEntity;

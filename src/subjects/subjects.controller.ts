@@ -28,6 +28,16 @@ export class SubjectsController {
         }
     }
 
+    @Get('all')
+    async getAllSubjects() {
+        try {
+            const allSubjects = await this.subjectService.getAllSubjects()
+            return sendJson(true, 'Subject by id fetched', allSubjects)
+        } catch (error) {
+            return sendJson(false, 'Failed to get all subjects', error)
+        }
+    }
+
 
     @Get('/id/:id')
     async findOneById(@Param('id') id: string) {

@@ -38,7 +38,7 @@ export class UserController {
 
     @UseInterceptors(ClassSerializerInterceptor)
     @UseGuards(AuthGuard)
-    @UseInterceptors(FileUrlInterceptor)
+    // @UseInterceptors(FileUrlInterceptor)
     @Get('/match')
     async getMatchingUsers(@Request() req) {
         const user = req.user
@@ -47,6 +47,22 @@ export class UserController {
         if (users.length > 0) {
             const allUsers = users.map((user => new serializedUser(user)))
             return sendJson(true, 'fetched all users successfully', allUsers)
+        }
+        else {
+            throw new HttpException('No users found', HttpStatus.NOT_FOUND)
+        }
+    }
+
+    @UseInterceptors(ClassSerializerInterceptor)
+    @UseGuards(AuthGuard)
+    @Get('/browse')
+    async findAllUsers(@Request() req, @Query('page') page: number) {
+        const user = req.user
+        const userId = user.id
+        const users = await this.userService.findAllUsers(userId, page)
+        if (users.data.length > 0) {
+            const allUsers = users.data.map((user => new serializedUser(user)))
+            return sendJson(true, 'fetched all users successfully', { users: allUsers, pageData: users.pageData })
         }
         else {
             throw new HttpException('No users found', HttpStatus.NOT_FOUND)

@@ -19,6 +19,7 @@ import { CountryStateCityModule } from './country-state-city/country-state-city.
 import { DashboardModule } from './dashboard/dashboard.module';
 import { PaymentModule } from './payment/payment.module';
 import { ChatModule } from './chat/chat.module';
+import { PeerJsService } from './peerjs/peerjs.service';
 
 @Module({
   imports: [
@@ -63,7 +64,7 @@ import { ChatModule } from './chat/chat.module';
     ChatModule
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [PeerJsService],
 })
 
 export class AppModule { }

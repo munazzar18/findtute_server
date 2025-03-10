@@ -25,6 +25,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer()
     server: Server;
 
+    private screenSharingSessions = new Map<string, string>();
+
 
     constructor(
         private readonly chatService: ChatService,
@@ -47,23 +49,27 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
         client.on('socketId', async (socketId) => {
             await this.userService.updateUser(user.id, { socketId: socketId })
-            // console.log(socketId)
         })
     }
 
     async handleDisconnect(client: Socket) {
+        try {
+            const token = client.handshake.auth.token;
+            if (!token) return;
 
-        // try {
-        //     const token = client.handshake.auth.token;
-        //     const user = this.jwtService.verify(token);
+            const user = this.jwtService.verify(token);
+            if (!user) return;
 
-        //     await this.userService.updateUser(user.id, { is_online: false });
-        //     client.broadcast.emit('status', { userId: user.id, status: 'You are offline' });
-
-        // } catch (error) {
-        //     console.error('Failed to handle disconnect:', error);
-        // }
-
+            // Check if this user is sharing in any room
+            for (const [roomId, userId] of this.screenSharingSessions.entries()) {
+                if (userId === user.id) {
+                    this.screenSharingSessions.delete(roomId);
+                    this.server.to(roomId).emit('screenShare:ended', { userId: user.id });
+                }
+            }
+        } catch (error) {
+            console.error('Error in handleDisconnect:', error);
+        }
     }
 
     @SubscribeMessage('joinChat')
@@ -76,17 +82,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const user = this.jwtService.verify(token);
 
         try {
-            // console.log(`User ${user.id} is trying to join chat with applicationId: ${applicationId}`);
-
             const room = await this.chatService.getRoomByChatId(chatId);
-
-
-            // Join the shared room
             client.join(room.id);
-            this.notificationService.sendToRoom(room.id, 'notification', { from: user.username, chatId, content: 'has joined the chat', userId: user.id })
-            // console.log(`User ${user.id} joined room ${room.id}`);
-
-            // return { success: true, chatId: chat.id, roomId };
+            this.notificationService.sendToRoom(room.id, 'notification', { from: user.username, chatId, content: 'is online', userId: user.id })
+            const sharingUserId = this.screenSharingSessions.get(room.id);
+            console.log("sharingUserId", sharingUserId)
+            if (sharingUserId) {
+                client.emit('screenShare:active', { userId: sharingUserId, roomId: room.id });
+            }
+            //  else {
+            //     this.screenSharingSessions.set(room.id, user.id);
+            //     client.emit('screenShare:active', { userId: user.id, roomId: room.id });
+            // }
+            return { success: true };
         } catch (error) {
             console.error('Error in handleJoinChat:', error);
             return { success: false, message: error.message };
@@ -107,28 +115,21 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             const message = await this.chatService.saveMessage(chatId, user.id, content);
             this.server.to(room.id).emit('newMessage', message)
 
-            this.server.to(room.other_user.socketId).emit('notification', {
-                from: user.username,
-                chatId,
-                content,
-                userId: user.id
-            });
+            const owner = room.owner
+            const recipient = room.other_user
+
+            if (user.id === owner.id) {
+                this.notificationService.sendToUser(recipient.socketId, 'notification', { from: user.username, chatId, content, userId: user.id })
+
+            } else {
+                this.notificationService.sendToUser(owner.socketId, 'notification', { from: user.username, chatId, content, userId: user.id })
+            }
 
             let messageStatus = 'Sent'
 
             client.emit('messageStatus', { messageId: message.id, status: messageStatus })
 
-            const recipientSocket = this.server.sockets.sockets.get(room.other_user.id)
-
-            if (recipientSocket) {
-                recipientSocket.emit('notification', {
-                    from: user.username,
-                    chatId,
-                    content,
-                    userId: user.id
-                });
-            }
-
+            return { success: true, message };
 
 
         } catch (error) {
@@ -136,37 +137,235 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         }
     }
 
-    @SubscribeMessage('startScreenShare')
-    async handleStartScreenShare(
-        @MessageBody('chatId') chatId: string,
+
+    @SubscribeMessage('deleteMessage')
+    async handleDeleteMessage(
+        @MessageBody('messageId') messageId: string,
         @ConnectedSocket() client: Socket,
     ) {
         const token = client.handshake.auth.token;
         const user = this.jwtService.verify(token);
-        client.to(chatId).emit('screenShareStarted', { userId: user.id, username: user.username });
+        try {
+            const message = await this.chatService.deleteMessage(messageId, user.id);
+            return { success: true, message };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     }
 
-    @SubscribeMessage('stopScreenShare')
+    // Screen sharing handlers
+    @SubscribeMessage('screenShare:start')
+    async handleStartScreenShare(
+        @MessageBody('roomId') roomId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        console.log("Screen share started")
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        try {
+            // Register this user as the screen sharer for this room
+            this.screenSharingSessions.set(roomId, user.id);
+
+            // Notify everyone in the room
+            this.server.to(roomId).emit('screenShare:started', {
+                userId: user.id,
+                roomId
+            });
+
+
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleStartScreenShare:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    @SubscribeMessage('screenShare:stop')
     async handleStopScreenShare(
-        @MessageBody('chatId') chatId: string,
+        @MessageBody('roomId') roomId: string,
         @ConnectedSocket() client: Socket,
     ) {
         const token = client.handshake.auth.token;
         const user = this.jwtService.verify(token);
-        client.to(chatId).emit('screenShareStopped', { userId: user.id, username: user.username });
+
+        try {
+            // Check if this user is the one sharing
+            const currentSharingUserId = this.screenSharingSessions.get(roomId);
+            if (currentSharingUserId !== user.id) {
+                return { success: false, message: 'You are not currently sharing your screen' };
+            }
+
+            // Remove screen sharing session
+            this.screenSharingSessions.delete(roomId);
+
+            // Notify everyone
+            this.server.to(roomId).emit('screenShare:ended', {
+                userId: user.id,
+                roomId
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleStopScreenShare:', error);
+            return { success: false, message: error.message };
+        }
     }
+
+    @SubscribeMessage('signal')
+    async handleSignal(
+        @MessageBody('roomId') roomId: string,
+        @MessageBody('signal') signal: any,
+        @MessageBody('to') targetUserId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        console.log("I am here!!!!!!!!!!!!!!!!!!!!!!!!!")
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        try {
+            const targetUser = await this.userService.findOneById(targetUserId);
+            console.log('Target user:', targetUser);
+            if (!targetUser || !targetUser.socketId) {
+                return { success: false, message: 'Target user not found or not online' };
+            }
+
+            // Just relay the signal to the target user
+            this.server.to(targetUser.socketId).emit('signal', {
+                signal,
+                from: user.id
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleSignal:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+
+    @SubscribeMessage('offer')
+    async handleOffer(
+        @MessageBody('roomId') roomId: string,
+        @MessageBody('offer') offer: any,
+        @MessageBody('targetUserId') targetUserId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        try {
+            // Get target user's socket ID
+            const targetUser = await this.userService.findOneById(targetUserId);
+            if (!targetUser || !targetUser.socketId) {
+                return { success: false, message: 'Target user not found or not connected' };
+            }
+
+            // Send offer directly to the target user
+            this.server.to(targetUser.socketId).emit('offer', {
+                offer,
+                from: user.id
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleOffer:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    @SubscribeMessage('answer')
+    async handleAnswer(
+        @MessageBody('roomId') roomId: string,
+        @MessageBody('answer') answer: any,
+        @MessageBody('targetUserId') targetUserId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        try {
+            // Get target user's socket ID
+            const targetUser = await this.userService.findOneById(targetUserId);
+            if (!targetUser || !targetUser.socketId) {
+                return { success: false, message: 'Target user not found or not connected' };
+            }
+
+            // Send answer directly to the target user
+            this.server.to(targetUser.socketId).emit('answer', {
+                answer,
+                from: user.id
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleAnswer:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
 
     @SubscribeMessage('shareScreenData')
-    async handleShareScreenData(
-        @MessageBody('chatId') chatId: string,
-        @MessageBody('screenData') screenData: string,
-        @ConnectedSocket() client: Socket,
-    ) {
+    async handleShareScreenData(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+        const { chatId, sdp } = data;
         const token = client.handshake.auth.token;
         const user = this.jwtService.verify(token);
         const room = await this.chatService.getRoomByChatId(chatId);
-        client.to(room.id).emit('receiveScreenData', screenData);
 
+        console.log('Broadcasting screen share offer to room:', room.id);
+
+        // Broadcast to everyone in the room except the sender
+        client.to(room.id).emit('screenShareOffer', {
+            sdp,
+            userId: user.id,
+            username: user.username
+        });
+    }
+
+    @SubscribeMessage('screenShareAnswer')
+    async handleScreenShareAnswer(@MessageBody() data: any, @ConnectedSocket() client: Socket) {
+        const { chatId, sdp, to } = data;
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        console.log('Sending screen share answer to:', to);
+
+        // Send the answer directly to the sender
+        this.server.to(to).emit('screenShareAnswer', {
+            sdp,
+            userId: user.id
+        });
+    }
+
+    @SubscribeMessage('iceCandidate')
+    async handleIceCandidate(
+        @MessageBody('roomId') roomId: string,
+        @MessageBody('candidate') candidate: any,
+        @MessageBody('targetUserId') targetUserId: string,
+        @ConnectedSocket() client: Socket,
+    ) {
+        const token = client.handshake.auth.token;
+        const user = this.jwtService.verify(token);
+
+        try {
+            // Get target user's socket ID
+            const targetUser = await this.userService.findOneById(targetUserId);
+            if (!targetUser || !targetUser.socketId) {
+                return { success: false, message: 'Target user not found or not connected' };
+            }
+
+            // Send ICE candidate directly to the target user
+            this.server.to(targetUser.socketId).emit('iceCandidate', {
+                candidate,
+                from: user.id
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error in handleIceCandidate:', error);
+            return { success: false, message: error.message };
+        }
     }
 
 

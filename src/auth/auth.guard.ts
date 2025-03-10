@@ -14,24 +14,24 @@ export class AuthGuard implements CanActivate {
         if (token) {
             try {
                 const decoded = this.jwtService.verify(token);
-                request.user = decoded; // Attach the decoded token to the request object
+                request.user = decoded;
                 return true;
             } catch (error) {
                 return false;
-                throw new WsException('Invalid token');
+
             }
         } else {
             return false;
-            throw new WsException('No token provided');
+
         }
     }
 
     private getRequest(context: ExecutionContext): any {
-        // For HTTP requests or WebSocket connections
+
         if (context.getType() === 'http') {
             return context.switchToHttp().getRequest();
         } else {
-            return context.switchToWs().getClient().handshake; // WebSocket handshake
+            return context.switchToWs().getClient().handshake;
         }
     }
 

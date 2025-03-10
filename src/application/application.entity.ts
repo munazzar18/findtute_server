@@ -1,3 +1,4 @@
+import { PaymentEntity } from "src/payment/payment.entity";
 import { UserEntity } from "src/user/user.entity";
 import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 
@@ -38,6 +39,9 @@ export class ApplicationEntity {
     @Column()
     user_id: string
 
+    @Column({ type: 'timestamptz', default: new Date() })
+    expiry_date: Date
+
     @CreateDateColumn({ type: 'timestamptz' })
     created_at: Date;
 
@@ -49,6 +53,9 @@ export class ApplicationEntity {
 
     @ManyToOne(() => UserEntity)
     student: UserEntity
+
+    @OneToMany(() => PaymentEntity, (payment) => payment.application)
+    payments: PaymentEntity[];
 
     @Column({ default: false })
     teacher_accepted: boolean

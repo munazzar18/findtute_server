@@ -22,4 +22,14 @@ export class NotificationService {
         }
     }
 
+    sendToUser(userId: string, event: string, data: any) {
+        console.log("userId", userId)
+        if (this.server && userId) {
+            this.server.to(userId).emit(event, data);
+            console.log(`Emitted event '${event}' to user ${userId} with data:`, data);
+        } else {
+            console.warn("Server not initialized or userId is invalid");
+        }
+    }
+
 }

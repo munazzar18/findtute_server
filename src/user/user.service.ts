@@ -11,6 +11,7 @@ import { promises as fs } from 'fs';
 import { UpdateUserProfileDto } from './updateUserProfile.dto';
 import { SubjectsEntity } from 'src/subjects/subjects.entity';
 import { GradeEntity } from 'src/grade/grade.entity';
+import { Role } from 'src/roles/role.enum';
 
 
 @Injectable()
@@ -28,6 +29,53 @@ export class UserService {
         return await this.userRepo.find()
     }
 
+    async findAllUsers(userId: string, page: number) {
+
+        const limit: number = 10;
+        const skip: number = (page - 1) * limit
+
+        const userData = await this.findOneById(userId)
+        let data: [UserEntity[], number]
+        if (userData.roles === Role.Teacher) {
+            data = await this.userRepo.findAndCount({
+                where: {
+                    id: Not(userId),
+                    roles: Role.Student
+                },
+                order: {
+                    id: 'ASC'
+                },
+
+                skip: skip,
+                take: (page * limit),
+                relations: ['grades', 'subjects']
+            })
+        } else {
+            data = await this.userRepo.findAndCount({
+                where: {
+                    id: Not(userId),
+                    roles: Role.Teacher
+                },
+                order: {
+                    id: 'ASC'
+                },
+                skip: skip,
+                take: (page * limit),
+                relations: ['grades', 'subjects']
+            })
+        }
+
+        return {
+            data: data[0],
+            pageData: {
+                total: data[1],
+                perPage: limit,
+                currentPage: Number(page),
+                totalPages: Math.ceil(data[1] / limit),
+            }
+        }
+    }
+
     async findMatching(userId: string) {
         const userData = await this.findOneById(userId)
 
@@ -36,7 +84,8 @@ export class UserService {
                 id: Not(userId),
                 preference: userData.preference,
 
-            }
+            },
+            relations: ['grades', 'subjects']
         })
 
         return data

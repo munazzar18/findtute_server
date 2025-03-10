@@ -7,6 +7,9 @@ import { JwtConstants } from 'src/constants/jwtConstants';
 import { ApplicationModule } from 'src/application/application.module';
 import { UserModule } from 'src/user/user.module';
 import { HttpModule, HttpService } from '@nestjs/axios';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { PaymentEntity } from './payment.entity';
+import { ApplicationEntity } from 'src/application/application.entity';
 
 
 @Module({
@@ -14,6 +17,7 @@ import { HttpModule, HttpService } from '@nestjs/axios';
     JwtModule.register({
       secret: JwtConstants.secret
     }),
+    TypeOrmModule.forFeature([PaymentEntity, ApplicationEntity]),
     ApplicationModule,
     UserModule,
     HttpModule
@@ -22,6 +26,9 @@ import { HttpModule, HttpService } from '@nestjs/axios';
   providers: [PaymentService, EncryptionService, {
     provide: 'SWITCH_URL',
     useValue: process.env.SWITCH_URL
-  }]
+  }, {
+      provide: 'SWITCH_BASE_URL',
+      useValue: process.env.SWITCH_BASE_URL
+    }]
 })
 export class PaymentModule { }

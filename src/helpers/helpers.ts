@@ -99,4 +99,21 @@ export function generateEncryptedHash(payload: object, secretKey: string): strin
     }
 }
 
+export function calculateExpiryDate(packageType: string) {
+    const currentDate = new Date();
+
+    switch (packageType.toLowerCase()) {
+        case "monthly":
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            break;
+        case "yearly":
+            currentDate.setFullYear(currentDate.getFullYear() + 1);
+            break;
+        default:
+            throw new Error('Invalid package type');
+    }
+
+    return currentDate
+}
+
 

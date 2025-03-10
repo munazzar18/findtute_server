@@ -6,6 +6,7 @@ import { SubjectsEntity } from "src/subjects/subjects.entity";
 import { ApplicationEntity } from "src/application/application.entity";
 import { ChatEntity } from "src/chat/chat.entity";
 import { RoomEntity } from "src/chat/room.entity";
+import { PaymentEntity } from "src/payment/payment.entity";
 
 @Entity()
 export class UserEntity {
@@ -108,6 +109,9 @@ export class UserEntity {
 
     @UpdateDateColumn({ type: 'timestamptz' })
     updated_at: Date;
+
+    @OneToMany(() => PaymentEntity, (payment) => payment.user)
+    payments: PaymentEntity[]
 
     @OneToMany(() => ApplicationEntity, (application) => application.teacher)
     create_application: ApplicationEntity[]

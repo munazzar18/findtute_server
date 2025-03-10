@@ -30,11 +30,13 @@ export class ApplicationService {
         return await this.applicationRepo.findOneBy({ user_id: id })
     }
 
-    async create(authUser: UserEntity) {
-
+    async create(authUser: UserEntity, paymentPackageDate: Date) {
         const paymentHash = authUser.is_authorized;
+
         const token = authUser.first_name + authUser.last_name + authUser.email + authUser.id;
         const isTokenValid = compareToken(token, paymentHash);
+
+        console.log("Is token valid", isTokenValid)
 
         if (!isTokenValid) {
             throw new Error('Invalid payment token');
@@ -66,7 +68,8 @@ export class ApplicationService {
             longitude: authUser.longitude,
             teacher: serialUser,
             teacher_accepted: true,
-            name: randName
+            expiry_date: paymentPackageDate,
+            name: randName,
         };
 
         const application = await this.applicationRepo.save(createApplication
