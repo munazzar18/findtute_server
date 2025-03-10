@@ -40,7 +40,9 @@ export class AuthService {
             username: user.username,
             email: user.email,
             id: user.id,
-            role: user.roles
+            role: user.roles,
+            is_verified: user.is_verified,
+            email_verified: user.email_verified
         }
         const accessToken = this.jwtService.sign(payload);
         return {
@@ -50,8 +52,8 @@ export class AuthService {
                 email: payload.email,
                 id: payload.id,
                 role: payload.role,
-                email_verified: user.email_verified,
-                is_verified: user.is_verified
+                email_verified: payload.email_verified,
+                is_verified: payload.is_verified
             }
         }
     }
