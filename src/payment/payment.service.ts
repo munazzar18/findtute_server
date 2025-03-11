@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { PaymentEntity } from './payment.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ApplicationEntity } from 'src/application/application.entity';
-import { compareToken } from 'src/auth/bcrypt';
+import { compareToken, encodedToken } from 'src/auth/bcrypt';
 import { PaymentStatus } from './paymentStatus.enum';
 import { UserService } from 'src/user/user.service';
 
@@ -160,83 +160,109 @@ export class PaymentService {
     }
 
     async inquireTransaction(payload: PaymentInquireDto, authUser: UserEntity) {
-        const baseUrl = process.env.SWITCH_BASE_URL
 
-        const user = await this.userService.findOneById(authUser.id)
+        try {
+            console.log("**********I am called**********")
+            const baseUrl = process.env.SWITCH_BASE_URL
 
-        const token = await this.authenticate()
+            const user = await this.userService.findOneById(authUser.id)
 
-        const response = await fetch(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${payload.transaction_id}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token.access_token}`
-            }
-        })
-        const data = await response.json()
+            const token = await this.authenticate()
 
-        if (data.status === 'success' && data.code == '0000') {
-            const payment = await this.paymentRepo.findOne({
-                where: {
-                    transaction_id: payload.transaction_id,
-                    user_id: authUser.id
+            const response = await fetch(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${payload.transaction_id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.access_token}`
                 }
             })
+            const data = await response.json()
 
-            if (!payment) {
-                throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
-            }
 
-            payment.status = PaymentStatus.Completed
-            await this.paymentRepo.save(payment)
+            if (data.status === 'success' && data.code == '0000') {
 
-            const paymentHash = user.is_authorized;
-            const token = user.first_name + user.last_name + user.email + user.id
-            const isTokenValid = compareToken(token, paymentHash);
-
-            if (!isTokenValid) {
-                throw new Error('Invalid payment token');
-            }
-
-            let randName: string;
-            let isUnique = false;
-
-            while (!isUnique) {
-                randName = generateRandomString(17);
-                const appExists = await this.applicationRepo.findOne({ where: { name: randName } });
-
-                if (!appExists) {
-                    isUnique = true;
-                }
-            }
-
-            if (payment.status === PaymentStatus.Completed) {
-                const expiryDate = calculateExpiryDate(payment.package)
-                const application = this.applicationRepo.create({
-                    preference: user.preference,
-                    grades: user.grades?.map(grade => grade.grade || grade.id),
-                    subjects: user.subjects?.map(subject => subject.subject || subject.id),
-                    user_id: user.id,
-                    avatar: user.avatar,
-                    hourly_rate: user.hourly_rate,
-                    monthly_rate: user.monthly_rate,
-                    lattitude: user.lattitude,
-                    longitude: user.longitude,
-                    teacher: user,
-                    teacher_accepted: true,
-                    name: randName,
-                    expiry_date: expiryDate
+                const payment = await this.paymentRepo.findOne({
+                    where: {
+                        transaction_id: payload.transaction_id,
+                        user_id: authUser.id
+                    }
                 })
 
-                await this.applicationRepo.save(application);
+                if (!payment) {
+                    throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
+                }
 
-                return application
+                payment.status = PaymentStatus.Completed
+                await this.paymentRepo.save(payment)
+
+                const key = process.env.ENCRYPTED_KEY
+
+                const generateHash = encodedToken(user.first_name + user.last_name + user.email + user.id + key)
+
+                await this.userService.updateUser(user.id, { is_authorized: generateHash })
+
+
+                const paymentHash = user.is_authorized;
+                const token = user.first_name + user.last_name + user.email + user.id + key
+                const isTokenValid = compareToken(token, paymentHash);
+
+
+                if (!isTokenValid) {
+                    throw new Error('Invalid payment token');
+                }
+
+                let randName: string;
+                let isUnique = false;
+
+                while (!isUnique) {
+                    randName = generateRandomString(17);
+                    const appExists = await this.applicationRepo.findOne({ where: { name: randName } });
+
+                    if (!appExists) {
+                        isUnique = true;
+                    }
+                }
+                const expiryDate = calculateExpiryDate(payment.package)
+
+                try {
+                    const application = this.applicationRepo.create({
+                        preference: user.preference,
+                        grades: user.grades?.map(grade => grade.grade || grade.id),
+                        subjects: user.subjects?.map(subject => subject.subject || subject.id),
+                        user_id: user.id,
+                        avatar: user.avatar,
+                        hourly_rate: user.hourly_rate,
+                        monthly_rate: user.monthly_rate,
+                        lattitude: user.lattitude,
+                        longitude: user.longitude,
+                        teacher: user,
+                        teacher_accepted: true,
+                        name: randName,
+                        expiry_date: expiryDate
+                    })
+
+                    await this.applicationRepo.save(application);
+
+
+                    return application
+                } catch (error) {
+                    console.error('Error creating application:', error.response?.data || error.message);
+                    throw new HttpException(
+                        error.response?.data || 'Failed',
+                        error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+                    );
+                }
+
+            } else {
+                throw new HttpException('Payment failed', HttpStatus.BAD_REQUEST);
             }
-
-        } else {
-            throw new HttpException('Payment failed', HttpStatus.BAD_REQUEST);
+        } catch (error) {
+            console.error('Error creating transaction:', error.response?.data || error.message);
+            throw new HttpException(
+                error.response?.data || 'Failed',
+                error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+            );
         }
-
     }
 
     async updatePaymentStatus(paymentId: string, data: PaymentStatusDto, authUser: UserEntity) {

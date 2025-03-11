@@ -32,9 +32,11 @@ export class PaymentController {
     @Post('inquire-transaction')
     async inquireTransaction(@Body() data: PaymentInquireDto, @Request() req) {
         try {
+
             const user = req.user
             const transaction = await this.paymentService.inquireTransaction(data, user)
-            return sendJson(true, "Transaction fetched successfully", transaction)
+            const serializedApplication = new serializedUser(transaction.teacher)
+            return sendJson(true, "Transaction fetched successfully", [])
         } catch (error) {
             return sendJson(false, "Failed to get transaction", error)
         }
