@@ -60,7 +60,7 @@ export class PaymentService {
         const client_id = process.env.CLIENT_ID
         const customerTransacionId = generateRandomString(13)
         const item = generateRandomString(7)
-        const amount = 1
+        const amount = 10
         const checkSum = switchHash(customerTransacionId, item, amount)
         const orderId = generateRandomString(6)
 
@@ -93,8 +93,6 @@ export class PaymentService {
         }
 
         const payment = await this.createLocalPayment(paymentPayLoad, user)
-
-        console.log("url", url)
 
 
         return url
@@ -167,7 +165,7 @@ export class PaymentService {
 
         const token = await this.authenticate()
 
-        console.log("token", token)
+
 
         // const response = await axios.get(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${transaction_id}`, {
         //     headers: {
