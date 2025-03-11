@@ -36,7 +36,7 @@ export class PaymentService {
             data.append('grant_type', 'client_credentials')
             data.append('client_id', client_id)
             data.append('client_secret', client_secret)
-            console.log("client id", client_id, "client secret", client_secret)
+
             const response = await axios.post(
                 authUrl,
                 data.toString(), {
@@ -130,7 +130,7 @@ export class PaymentService {
                 Token: token
             })
 
-            console.log(response)
+
 
             return response.data
 
