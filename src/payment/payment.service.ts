@@ -29,14 +29,14 @@ export class PaymentService {
 
     async authenticate() {
         try {
-            const authUrl = 'https://sandbox-auth.swichnow.com/connect/token'
+            const authUrl = process.env.AUTH_URL
             const client_id = process.env.CLIENT_ID
             const client_secret = process.env.CLIENT_SECRET
             const data = new URLSearchParams()
             data.append('grant_type', 'client_credentials')
             data.append('client_id', client_id)
             data.append('client_secret', client_secret)
-
+            console.log("client id", client_id, "client secret", client_secret)
             const response = await axios.post(
                 authUrl,
                 data.toString(), {
@@ -159,20 +159,14 @@ export class PaymentService {
         return payment
     }
 
-    async inquireTransaction(transactionId: PaymentInquireDto) {
+    async inquireTransaction(payload: PaymentInquireDto, authUser: UserEntity) {
         const baseUrl = process.env.SWITCH_BASE_URL
-        const { transaction_id } = transactionId
+
+        const user = await this.userService.findOneById(authUser.id)
 
         const token = await this.authenticate()
 
-
-
-        // const response = await axios.get(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${transaction_id}`, {
-        //     headers: {
-        //         'Authorization': `Bearer ${token}`
-        //     }
-        // })
-        const response = await fetch(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${transaction_id}`, {
+        const response = await fetch(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${payload.transaction_id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -180,21 +174,69 @@ export class PaymentService {
             }
         })
         const data = await response.json()
-        console.log("response", data)
-        return data
 
-        // try {
-        //     const response = await axios.get(`${baseUrl}/gateway/payin/inquire?CustomerTransactionId=${transaction_id}`)
-        //     console.log("response", response.data)
-        //     return response.data
-        // } catch (error) {
-        //     console.error('Error inquiring transaction:', error.response?.data || error.message);
-        //     throw new HttpException(
-        //         error.response?.data || 'Failed',
-        //         error.response?.status || HttpStatus.INTERNAL_SERVER_ERROR,
-        //     );
+        if (data.status === 'success' && data.code == '0000') {
+            const payment = await this.paymentRepo.findOne({
+                where: {
+                    transaction_id: payload.transaction_id,
+                    user_id: authUser.id
+                }
+            })
 
-        // }
+            if (!payment) {
+                throw new HttpException('Payment not found', HttpStatus.NOT_FOUND);
+            }
+
+            payment.status = PaymentStatus.Completed
+            await this.paymentRepo.save(payment)
+
+            const paymentHash = user.is_authorized;
+            const token = user.first_name + user.last_name + user.email + user.id
+            const isTokenValid = compareToken(token, paymentHash);
+
+            if (!isTokenValid) {
+                throw new Error('Invalid payment token');
+            }
+
+            let randName: string;
+            let isUnique = false;
+
+            while (!isUnique) {
+                randName = generateRandomString(17);
+                const appExists = await this.applicationRepo.findOne({ where: { name: randName } });
+
+                if (!appExists) {
+                    isUnique = true;
+                }
+            }
+
+            if (payment.status === PaymentStatus.Completed) {
+                const expiryDate = calculateExpiryDate(payment.package)
+                const application = this.applicationRepo.create({
+                    preference: user.preference,
+                    grades: user.grades?.map(grade => grade.grade || grade.id),
+                    subjects: user.subjects?.map(subject => subject.subject || subject.id),
+                    user_id: user.id,
+                    avatar: user.avatar,
+                    hourly_rate: user.hourly_rate,
+                    monthly_rate: user.monthly_rate,
+                    lattitude: user.lattitude,
+                    longitude: user.longitude,
+                    teacher: user,
+                    teacher_accepted: true,
+                    name: randName,
+                    expiry_date: expiryDate
+                })
+
+                await this.applicationRepo.save(application);
+
+                return application
+            }
+
+        } else {
+            throw new HttpException('Payment failed', HttpStatus.BAD_REQUEST);
+        }
+
     }
 
     async updatePaymentStatus(paymentId: string, data: PaymentStatusDto, authUser: UserEntity) {

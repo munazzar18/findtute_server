@@ -27,12 +27,13 @@ export class PaymentController {
         }
     }
 
-
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(Role.Teacher)
     @Post('inquire-transaction')
-    async inquireTransaction(@Body() data: PaymentInquireDto) {
+    async inquireTransaction(@Body() data: PaymentInquireDto, @Request() req) {
         try {
-
-            const transaction = await this.paymentService.inquireTransaction(data)
+            const user = req.user
+            const transaction = await this.paymentService.inquireTransaction(data, user)
             return sendJson(true, "Transaction fetched successfully", transaction)
         } catch (error) {
             return sendJson(false, "Failed to get transaction", error)

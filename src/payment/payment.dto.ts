@@ -61,4 +61,5 @@ export class PaymentInquireDto {
 
     @IsNotEmpty()
     transaction_id: string
+
 }
